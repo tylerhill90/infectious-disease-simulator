@@ -1,8 +1,9 @@
-"""Classes for running simple airborne infection simulations."""
+"""Classes for running simple airborne infection simulations.
+"""
 
 import numpy as np
 from scipy.stats import norm
-from random import choice, random
+from random import random, choice
 import sys
 
 
@@ -22,13 +23,11 @@ class Environment:
         self.death_mean = env_params['days_to_die'][0]
         self.death_sd = env_params['days_to_die'][1]
 
-        # Keeping track of stats
-        self.total_interactions = 0
+        # For keeping track of stats during the simulation
         self.report = {
             'infectious': [self.initially_infected],
             'recovered': [0],
-            'dead': [0],
-            'epoch_interactions': [0]
+            'dead': [0]
         }
 
         # Generate the environment and population
@@ -41,13 +40,13 @@ class Environment:
         self.populate()
 
     def populate(self):
-        """Populate the environment randomly with the appropriate amount of 
+        """Populate the environment randomly with the appropriate amount of
         infected and non-infected people."""
         count = 0
         for person in self.pop:
             while True:
-                row, col = choice(range(self.env_dim)), choice(
-                    range(self.env_dim))
+                row = np.random.randint(self.env_dim)
+                col = np.random.randint(self.env_dim)
                 if self.env[row, col] == np.Inf:
                     self.env[row, col] = person
                 else:
@@ -57,38 +56,39 @@ class Environment:
                 count += 1
                 break
 
-
-
     def move(self, subject):
         """Take one random step from the current position."""
-        position = np.where(self.env == subject)
+        position = np.where(self.env == subject)  # Current position in env
+        directions = [
+            [-1, 1], [0, 1], [1, 1],
+            [-1, 0], [1, 0],
+            [-1, -1], [0, -1], [1, -1]
+        ]
         while True:
-            step = [choice(range(-1, 2)), choice(range(-1, 2))]
-            if step != [0, 0]:  # Check if moving
-                new_position = [int(position[0] + step[0]),
-                                int(position[1] + step[1])]
+            if directions == []:
+                break
+            step = choice(directions)
+            directions.remove(step)
+            new_position = [position[0] + step[0],
+                            position[1] + step[1]]
 
-                # Check if new position will be out of bounds
-                if any(x not in range(self.env_dim) for x in new_position):
-                    continue
+            for coordinate in range(len(new_position)):
+                if new_position[coordinate] == -1:
+                    new_position[coordinate] = self.env_dim - 1
+                if new_position[coordinate] == self.env_dim:
+                    new_position[coordinate] = 0
 
-                # New positions within the bounds of the environment
-                else:
-                    new_row, new_col = new_position[0], new_position[1]
-                    old_row, old_col = position[0], position[1]
+            # Check if new position is empty
+            if self.env[new_position[0], new_position[1]] == np.Inf:
+                # Move subject to new position
+                self.env[new_position[0], new_position[1]] = subject
+                # Remove subject from previous position
+                self.env[position[0], position[1]] = np.Inf
+            # New position is full so choose a new random step
+            else:
+                continue
 
-                    # New position is empty
-                    if self.env[new_row, new_col] == np.Inf:
-                        # Move subject to new position
-                        self.env[new_row, new_col] = subject
-                        # Remove subject from previous position
-                        self.env[old_row, old_col] = np.Inf
-
-                    # New position is full so choose a new random step
-                    else:
-                        continue
-
-                    break
+            break
 
     def infect(self, person):
         """See if an infected person infects others.
@@ -101,7 +101,7 @@ class Environment:
         n = self.env_dim
         r = self.interaction_rate
 
-        y, x = np.ogrid[-y_center:n-y_center, -x_center:n-x_center]
+        y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
         mask = x*x + y*y <= r*r
 
         mask_indices = np.where(mask == True)
@@ -193,10 +193,12 @@ class Environment:
                         self.pop[person].alive == False]
                 )
             )
-            self.report['epoch_interactions'].append(
-                self.total_interactions -
-                sum(self.report['epoch_interactions'])
-            )
+
+    def __repr__(self):
+        return str(f'Pop{len(self.pop)}-'
+                   f'Env{self.env_dim}x{self.env_dim}-'
+                   f'IntRate{self.interaction_rate}'
+                   r'.png')
 
 
 class Person:
