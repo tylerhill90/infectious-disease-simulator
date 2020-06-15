@@ -4,7 +4,7 @@ the two different implementations of the infection simulators. Generates plots
 for each simulation to show how they differ in outcome as well.
 """
 
-import NumPyInfectionSimClass
+import InfectionSim
 import InfectionSimClass
 from helper_functions import generate_plot
 import time
@@ -31,7 +31,7 @@ def main():
     # NumPy implementation
     print('NumPy implementation')
     start_time = time.perf_counter()
-    env_1 = NumPyInfectionSimClass.Environment(env_params)
+    env_1 = InfectionSim.Environment(env_params)
     env_1.run_sim()
     end_time = time.perf_counter()
     run_time = end_time - start_time

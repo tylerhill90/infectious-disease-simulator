@@ -8,7 +8,8 @@ import sys
 
 
 class Environment:
-
+    """
+    """
     def __init__(self, env_params):
         # Unpack user given environment parameters
         self.env_dim = env_params['env_dim']
@@ -117,7 +118,8 @@ class Environment:
                 - If someone is infected, then
                     - See if they die
                         - If they do, remove them from the environment
-                        - If not, advance their days_infected variable"""
+                        - If not, advance their days_infected variable
+                            - Check if they recover"""
         for ix, iy in np.ndindex(self.env.shape):
             if self.env[ix, iy] != np.Inf:
                 person = self.env[ix, iy]
