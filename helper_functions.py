@@ -1,12 +1,9 @@
-"""A very simple simulation of infection in a square closed environment."""
+#!/usr/bin/env python
+"""Helper functions.
+"""
 
-from InfectionSimClass import *
-import sys
-import time
-from math import floor
-from statistics import median
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def get_env_dim():
@@ -113,110 +110,34 @@ def get_time():
             print('Time must be a positive integer below 1,000')
 
 
-def get_silence_preference():
-    """Ask the user if they would like to run the simulation silently"""
-    while True:
-        try:
-            is_silent = input(
-                'Run the simulation silently?\n[y]es\t[n]o\n'
-            )
-            if is_silent == 'y':
-                return True
-            elif is_silent == 'n':
-                return False
-            else:
-                print(
-                    'Invlaid entry. Please enter either "y" for yes or "n" '
-                    'for no.'
-                )
-
-
-def generate_plot(env, init_cons):
+def generate_plot(env, show=True, save=False):
     """Generate a plot from a simulation."""
-    time = np.array(range(init_cons['time'] + 1))
+
+    # Collect the data for graphing
+    time = np.array(range(env.time + 1))
     infectious = np.array(env.report['infectious'])
     recovered = np.array(env.report['recovered'])
     dead = np.array(env.report['dead'])
 
+    # Plot the data
     infectious, = plt.plot(
         time, infectious, label=f'Infectious (max of {max(infectious)})')
     recovered, = plt.plot(
         time, recovered, label=f'Recovered ({recovered[-1]})')
     dead, = plt.plot(time, dead, label=f'Deceased ({dead[-1]})')
 
+    # Set graph title, axis, and legend
     plt.title(
-        f'Infection Simulation Results\nMedian Interaction Rate of '
-        f'{init_cons["interaction"]}')
+        f'Infection Simulation Results\nInteraction Rate of '
+        f'{env.interaction_rate}'
+    )
     plt.ylabel('Number of people')
     plt.xlabel('Time')
     plt.legend(handles=[infectious, recovered, dead])
 
-    plt.show()
-    plt.close()
-
-
-def main():
-    """Get user defined inputs and then run a simple simulation of 
-    infection."""
-
-    # Explain how the simulation works to the user
-
-    # Get environment parameters from user
-    env_dim = get_env_dim()
-    population = get_pop()
-    print('Interaction rate:')
-    interaction = get_interaction_rate()
-    print('Infection rate for one interaction')
-    infection = get_percent()
-    initially_infected = get_initial_infected(population)
-    print('Mortality rate')
-    mortality = get_percent()
-    time = get_time()
-
-    # Run the simulation silently?
-    is_silent = get_silence_preference()
-
-    # Create environment
-    env = Environment(env_dim, population, interaction,
-                        infection, initially_infected, mortality)
-
-    # Report starting conditions
-    print('Starting Conditions')
-    print(f'Environment dimensions: {env_dim} x {env_dim}')
-    print(f'Population size: {population}')
-    print(f'Interaction rate: mean of {interaction}')
-    print(f'Infection rate: {infection}')
-    print(f'Number initially infected: {initially_infected}')
-    print(f'Mortality rate: {mortality}')
-    print(f'Time: {time}\n')
-
-    # Run simulation
-    env.run_sim(time)
-
-    # Calculate some final number totals
-    # Ad preceding zeroes to match length of population
-    pop_len = len(str(population))
-
-    infected = str(env.report['infectious']).zfill(pop_len)
-
-    recovered = str(env.report['recovered']).zfill(pop_len)
-
-    dead = str(env.report['dead']).zfill(pop_len)
-
-    # Report totals
-    interaction_rates = [
-        env.pop[person].interaction_rate for person in env.pop]
-    print(
-        f'\nInteraction rate\nMin: {min(interaction_rates)}\nMedian: '
-        f'{median(interaction_rates)}\nMax: {max(interaction_rates)}'
-    )
-    print(f'Total interactions: {env.total_interactions}\n')
-    print(f'Infected:\t{infected} / {population}')
-    print(f'Recovered:\t{recovered} / {population}')
-    print(f'Dead:\t\t{dead} / {population}')
-
-    generate_plot(env, init_cons)
-
-
-if __name__ == '__main__':
-    main()
+    # Show the graph
+    if save == True:
+        plt.savefig(f'./{env}')
+    if show == True:
+        plt.show()
+        plt.close()
