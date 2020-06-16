@@ -4,6 +4,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import functools
 
 
 def get_env_dim():
@@ -135,7 +137,7 @@ def generate_plot(env, show=True, save=False):
     plt.xlabel('Time')
     plt.legend(handles=[infectious, recovered, dead])
 
-    # Show the graph
+    # Save and show the graph if requested
     if save == True:
         plt.savefig(f'./{env}')
     if show == True:
