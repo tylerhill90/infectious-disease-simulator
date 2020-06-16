@@ -12,10 +12,10 @@ class Environment:
     """
     def __init__(self, env_params):
         # Unpack user given environment parameters
+        self.time = env_params['time']
         self.env_dim = env_params['env_dim']
         self.pop_size = env_params['pop_size']
         self.initially_infected = env_params['initially_infected']
-        self.time = env_params['time']
         self.interaction_rate = env_params['interaction_rate']
         self.infection_rate = env_params['infection_rate']
         self.mortality_rate = env_params['mortality_rate']
@@ -153,7 +153,7 @@ class Environment:
         if random() <= death_prob:
             self.pop[person].alive = False
 
-    def run_sim(self):
+    def run_basic_sim(self):
         """Run the infection simulation and save relevant statistics at each
         epoch (time step)."""
 

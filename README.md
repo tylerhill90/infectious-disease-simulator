@@ -1,4 +1,6 @@
-The Environment class creates an NumPy 2D array to act as an environment for 
+# COVID-19 Simulator
+
+The Environment class creates an NumPy 2D array to act as an environment for
 a population to randomly move around in. The environment is populated randomly
 with ints representing unique people in the population. Each int is
 associated with a Person instance in a dictionary to keep track of their
@@ -21,5 +23,4 @@ based on cumulative density function of how many days they have been infected
 and a normal distribution of the how many days a person takes to die. If they
 die they are removed from the environment. The cleanup phase next checks if 
 the person recovers based on the number of days it takes for them to recover
-defined when they were instantiated. 
-
+defined when they were instantiated.
