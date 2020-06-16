@@ -1,11 +1,6 @@
 #!/usr/bin/env python
-"""Helper functions.
+"""Helper functions for running simulations from user inputs.
 """
-
-import numpy as np
-import matplotlib.pyplot as plt
-import time
-import functools
 
 
 def get_env_dim():
@@ -110,36 +105,3 @@ def get_time():
                 return time
         except:
             print('Time must be a positive integer below 1,000')
-
-
-def generate_plot(env, show=True, save=False):
-    """Generate a plot from a simulation."""
-
-    # Collect the data for graphing
-    time = np.array(range(env.time + 1))
-    infectious = np.array(env.report['infectious'])
-    recovered = np.array(env.report['recovered'])
-    dead = np.array(env.report['dead'])
-
-    # Plot the data
-    infectious, = plt.plot(
-        time, infectious, label=f'Infectious (max of {max(infectious)})')
-    recovered, = plt.plot(
-        time, recovered, label=f'Recovered ({recovered[-1]})')
-    dead, = plt.plot(time, dead, label=f'Deceased ({dead[-1]})')
-
-    # Set graph title, axis, and legend
-    plt.title(
-        f'Infection Simulation Results\nInteraction Rate of '
-        f'{env.interaction_rate}'
-    )
-    plt.ylabel('Number of people')
-    plt.xlabel('Time')
-    plt.legend(handles=[infectious, recovered, dead])
-
-    # Save and show the graph if requested
-    if save == True:
-        plt.savefig(f'./{env}')
-    if show == True:
-        plt.show()
-        plt.close()
