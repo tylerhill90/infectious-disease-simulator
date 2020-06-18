@@ -24,3 +24,7 @@ and a normal distribution of the how many days a person takes to die. If they
 die they are removed from the environment. The cleanup phase next checks if 
 the person recovers based on the number of days it takes for them to recover
 defined when they were instantiated.
+
+Below is an example plot outputted from a basic simulation.
+![Example Figure]
+(/figures/example-fig.png)

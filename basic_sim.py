@@ -41,7 +41,7 @@ def main():
     print(f'Run time: {run_time:.4} secs')
 
     # Graph results
-    env.generate_plot(save=True)
+    env.generate_plot()
 
 
 if __name__ == '__main__':

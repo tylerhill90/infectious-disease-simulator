@@ -277,12 +277,12 @@ class Environment:
 
         # Plot the data
         infectious, = plt.plot(
-            time, infectious, label=f'Infectious (max of {max(infectious)})')
+            time, infectious, label=f'Infectious (max: {max(infectious)})')
         recovered, = plt.plot(
-            time, recovered, label=f'Recovered (ended at {recovered[-1]})')
-        dead, = plt.plot(time, dead, label=f'Deceased (ended at {dead[-1]})')
+            time, recovered, label=f'Recovered (end: {recovered[-1]})')
+        dead, = plt.plot(time, dead, label=f'Deceased (end: {dead[-1]})')
         not_infected, = plt.plot(
-            time, not_infected, label=f'Not infected (ended at {not_infected[-1]})'
+            time, not_infected, label=f'Not infected (end: {not_infected[-1]})'
         )
 
         # Set graph title, axis, and legend
@@ -292,6 +292,20 @@ class Environment:
         plt.ylabel('Number of people')
         plt.xlabel('Time')
         plt.legend(handles=[infectious, recovered, dead, not_infected])
+
+        # Plot description
+        plt_txt = str(
+            f'This simulation was run in a {self.env_dim}x{self.env_dim} '
+            f'environment with a population size of {self.pop_size}, with '
+            f'{self.initially_infected} initially infected people. '
+            f'An interaction rate of {self.interaction_rate} was used and '
+            f'the simulation was run for {self.time} time steps.'
+        )
+
+        # Add the plot description below x-axis
+        plt.subplots_adjust(bottom=0.4)
+        plt.figtext(0.5, 0.175, plt_txt, wrap=True,
+                    ha='center', va='bottom', fontsize=10)
 
         # Save and show the graph if requested
         if save == True:
@@ -303,7 +317,8 @@ class Environment:
     def __repr__(self):
         return str(f'Pop{self.pop_size}-'
                    f'Env{self.env_dim}x{self.env_dim}-'
-                   f'InteractionRate{self.interaction_rate}'
+                   f'InitInfect{self.initially_infected}-'
+                   f'IntRate{self.interaction_rate}'
                    '.png')
 
 
