@@ -200,8 +200,9 @@ class Environment:
         self.report['infectious'].append(
             sum(
                 [1 for person in self.pop if (
-                    [self.pop[person].infected, self.pop[person].recovered]
-                ) == [True, False]]
+                    [self.pop[person].infected,
+                        self.pop[person].recovered, self.pop[person].alive]
+                ) == [True, False, True]]
             )
         )
         self.report['recovered'].append(
