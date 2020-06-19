@@ -5,15 +5,14 @@
 import pygame
 import numpy as np
 from InfectionSim import *
-from helper_functions import *
 
 
 def main():
     # Set some environment parameters
-    env_dim = 50
-    pop_size = 200
-    initially_infected = 3
-    interaction_rate = 2
+    env_dim = 80
+    pop_size = 400
+    initially_infected = 4
+    interaction_rate = 3
     time = 90
 
     # Load environment parameters into a dict
@@ -23,7 +22,7 @@ def main():
         'pop_size': pop_size,
         'initially_infected': initially_infected,
         'interaction_rate': interaction_rate,
-        'infection_rate': .2,  # Need to confirm
+        'infection_rate': .25,  # Need to confirm
         'mortality_rate': .02,  # Need to confirm
         'days_to_recover': (19, 5),  # Need to confirm
         'days_to_die': (14, 4)  # Need to confirm
@@ -35,16 +34,20 @@ def main():
     # Define some colors
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
+    RED = (255, 0, 0)
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
+
+    # Define some other constants
+    TIME_DELAY = 150  # Milliseconds
+    CELL = 10
+    MARGIN = 1
+    SCREEN_DIM = env_dim * CELL + (MARGIN * env_dim + 1)
 
     pygame.init()
 
     # Define screen size based on the env_dim, the cell size of the grid, and
     # they margin size between cells
-    CELL = 10
-    MARGIN = 1
-    SCREEN_DIM = env_dim * CELL + (MARGIN * env_dim + 1)
     screen = pygame.display.set_mode((SCREEN_DIM, SCREEN_DIM))
     screen.fill(BLACK)
 
@@ -57,6 +60,8 @@ def main():
                     color = BLACK
                 elif env.pop[person].recovered == True:
                     color = BLUE
+                elif env.pop[person].alive == False:
+                    color = RED
                 else:
                     color = GREEN
             else:
@@ -69,17 +74,17 @@ def main():
 
         # Display the current environment state
         pygame.display.flip()
-        pygame.time.delay(100)
+        pygame.time.delay(TIME_DELAY)
 
         # Move the simulation one time step forward
-        for person in env.pop:
+        for person in env.pop.keys():
             if env.pop[person].alive == True:
                 env.move(person)
                 if env.pop[person].infected == True:
                     env.infect(person)
 
         # Perform the clean up phase and save stats for plotting
-        env.clean_up(remove_recovered=False)
+        env.clean_up(remove_persons=False)
         env.save_stats()
 
         # Decrement the time steps left

@@ -28,6 +28,8 @@ class Environment:
         self.death_sd = env_params['days_to_die'][1]
 
         # Keep track of stats during the simulation to use for graphing
+        self.recovered = 0
+        self.dead = 0
         self.report = {
             'infectious': [self.initially_infected],
             'recovered': [0],
@@ -141,25 +143,38 @@ class Environment:
                 if random() <= self.infection_rate:
                     self.pop[subject].infected = True
 
-    def clean_up(self, remove_recovered=True):
+    def clean_up(self, remove_persons=True):
         """Traverse the environment and for each person do the following:
                 - If someone is infected, then
                     - See if they die
                         - If they do, remove them from the environment
                         - If not, advance their days_infected variable
                             - Check if they recover
+        Args:
+            remove_persons (bool): If True dead and recovered people are not
+                removed from the environment. Useful for the PyGame
+                visualization.
+
+        Return:
+            None
         """
 
         for ix, iy in np.ndindex(self.env.shape):
             if self.env[ix, iy] != np.Inf:  # Cell is occupied by a person
                 person = self.env[ix, iy]
-                if [self.pop[person].infected,
-                        self.pop[person].recovered] == [True, False]:
+                clean_up_conditions = [
+                    self.pop[person].alive,
+                    self.pop[person].infected,
+                    self.pop[person].recovered
+                ]
+                if clean_up_conditions == [True, True, False]:
                     # See if the infected person dies
                     self.death_roll(person)
                     # Remove them from the environment if they died
                     if self.pop[person].alive == False:
-                        self.env[ix, iy] = np.Inf
+                        self.dead += 1
+                        if remove_persons:
+                            self.env[ix, iy] = np.Inf
                     # Else they didn't die so advance their days infected and
                     # check if they have recovered. Remove them if they have.
                     else:
@@ -167,7 +182,8 @@ class Environment:
                         if self.pop[person].days_infected == \
                                 self.pop[person].days_to_recover:
                             self.pop[person].recovered = True
-                            if remove_recovered == True:
+                            self.recovered += 1
+                            if remove_persons:
                                 self.env[ix, iy] = np.Inf
 
     def death_roll(self, person):
@@ -201,24 +217,18 @@ class Environment:
 
         self.report['infectious'].append(
             sum(
-                [1 for person in self.pop if (
-                    [self.pop[person].infected,
-                        self.pop[person].recovered, self.pop[person].alive]
-                ) == [True, False, True]]
+                [1 for person in self.pop if ([
+                    self.pop[person].alive,
+                    self.pop[person].infected,
+                    self.pop[person].recovered
+                ]) == [True, True, False]]
             )
         )
-        self.report['recovered'].append(
-            sum(
-                [1 for person in self.pop if
-                    self.pop[person].recovered == True]
-            )
-        )
-        self.report['dead'].append(
-            sum(
-                [1 for person in self.pop if
-                    self.pop[person].alive == False]
-            )
-        )
+
+        self.report['recovered'].append(self.recovered)
+
+        self.report['dead'].append(self.dead)
+
         self.report['not_infected'].append(
             self.pop_size -
             self.report['recovered'][-1] -
@@ -284,7 +294,7 @@ class Environment:
         infectious, = plt.plot(
             time, infectious, label=str(
                 f'Infectious (end: {infectious[-1]} | max: {max(infectious)})'
-        ))
+            ))
         recovered, = plt.plot(
             time, recovered, label=f'Recovered (end: {recovered[-1]})')
         dead, = plt.plot(time, dead, label=f'Deceased (end: {dead[-1]})')
