@@ -9,10 +9,10 @@ from InfectionSim import *
 
 def main():
     # Set some environment parameters
-    env_dim = 80
+    env_dim = 60
     pop_size = 400
     initially_infected = 4
-    interaction_rate = 3
+    interaction_rate = 2
     time = 90
 
     # Load environment parameters into a dict
@@ -39,7 +39,7 @@ def main():
     BLUE = (0, 0, 255)
 
     # Define some other constants
-    TIME_DELAY = 150  # Milliseconds
+    TIME_DELAY = 200  # Milliseconds
     CELL = 10
     MARGIN = 1
     SCREEN_DIM = env_dim * CELL + (MARGIN * env_dim + 1)
@@ -56,14 +56,16 @@ def main():
         for row, col in np.ndindex(env.env.shape):
             if env.env[row, col] != np.Inf:  # Cell is occupied by a person
                 person = env.env[row, col]
-                if env.pop[person].infected == False:
-                    color = BLACK
+                infectious = [env.pop[person].infected,
+                  env.pop[person].alive, env.pop[person].recovered]
+                if infectious == [True, True, False]:
+                    color = GREEN
                 elif env.pop[person].recovered == True:
                     color = BLUE
                 elif env.pop[person].alive == False:
                     color = RED
                 else:
-                    color = GREEN
+                    color = BLACK
             else:
                 color = WHITE
             pygame.draw.rect(screen, color,

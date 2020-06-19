@@ -129,7 +129,7 @@ class Environment:
 
         # Create a mask to look for people surrounding the subject
         y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
-        mask = x*x + y*y <= r*r
+        mask = x*x + y*y < r*r
 
         # Get environment indices of the mask
         mask_indices = np.where(mask == True)
@@ -182,6 +182,7 @@ class Environment:
                         if self.pop[person].days_infected == \
                                 self.pop[person].days_to_recover:
                             self.pop[person].recovered = True
+                            self.pop[person].infected = False
                             self.recovered += 1
                             if remove_persons:
                                 self.env[ix, iy] = np.Inf
