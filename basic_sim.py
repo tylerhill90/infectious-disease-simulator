@@ -5,7 +5,6 @@ simulation is run for 180 time steps with an interaction rate of 2.
 """
 
 from InfectionSim import *
-from helper_functions import generate_plot
 import time
 
 
@@ -42,7 +41,7 @@ def main():
     print(f'Run time: {run_time:.4} secs')
 
     # Graph results
-    generate_plot(env)
+    env.generate_plot()
 
 
 if __name__ == '__main__':

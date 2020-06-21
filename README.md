@@ -1,5 +1,9 @@
 # COVID-19 Simulator
 
+The intent of this project is to run simple simulations of how infectious
+diseases spread through a population. The InfectionSim.py file houses the
+classes necessary to run these simulations.
+
 The Environment class creates an NumPy 2D array to act as an environment for
 a population to randomly move around in. The environment is populated randomly
 with ints representing unique people in the population. Each int is
@@ -24,3 +28,6 @@ and a normal distribution of the how many days a person takes to die. If they
 die they are removed from the environment. The cleanup phase next checks if 
 the person recovers based on the number of days it takes for them to recover
 defined when they were instantiated.
+
+Below is an example plot outputted from a basic simulation.
+![Example Figure](/figures/example-fig.png)
