@@ -2,18 +2,20 @@
 """
 """
 
+import sys
 import pygame
 import numpy as np
 from InfectionSim import *
 
 
 def main():
-    # Set some environment parameters
-    env_dim = 60
-    pop_size = 400
-    initially_infected = 4
+    # SIMULATION SETUP
+    # Environment parameters
+    env_dim = 150
+    pop_size = 2000
+    initially_infected = 5
     interaction_rate = 2
-    time = 90
+    time = 180
 
     # Load environment parameters into a dict
     env_params = {
@@ -28,73 +30,100 @@ def main():
         'days_to_die': (14, 4)  # Need to confirm
     }
 
-    # Set up the simulation environment
-    env = Environment(env_params)
+    # Instantiate the simulation environment
+    sim = Environment(env_params)
 
-    # Define some colors
+    # PYGAME VISUALIZATION
+    pygame.init()
+
+    # Define some visualization constants
+    TIME_DELAY = 0  # Milliseconds
+    CELL = 5
+    MARGIN = 1
+    RADIUS = sim.interaction_rate * (MARGIN + CELL)  # For drawing circles
+    SCREEN_DIM = env_dim * CELL + (MARGIN * env_dim + 1)
+
+    # RGB Colors
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
     RED = (255, 0, 0)
     GREEN = (0, 255, 0)
+    OLIVE = (100, 200, 0)
     BLUE = (0, 0, 255)
-
-    # Define some other constants
-    TIME_DELAY = 200  # Milliseconds
-    CELL = 10
-    MARGIN = 1
-    SCREEN_DIM = env_dim * CELL + (MARGIN * env_dim + 1)
-
-    pygame.init()
 
     # Define screen size based on the env_dim, the cell size of the grid, and
     # they margin size between cells
     screen = pygame.display.set_mode((SCREEN_DIM, SCREEN_DIM))
-    screen.fill(BLACK)
 
-    while time != 0:
+    running = True
+    while running:
+        screen.fill(BLACK)
+        circle_centers = []
         # Draw the current environment state
-        for row, col in np.ndindex(env.env.shape):
-            if env.env[row, col] != np.Inf:  # Cell is occupied by a person
-                person = env.env[row, col]
-                infectious = [env.pop[person].infected,
-                  env.pop[person].alive, env.pop[person].recovered]
+        for row, col in np.ndindex(sim.env.shape):
+            if sim.env[row, col] != np.Inf:  # Cell is occupied by a person
+                person = sim.env[row, col]
+                infectious = [sim.pop[person].alive,
+                              sim.pop[person].infected,
+                              sim.pop[person].recovered]
+                # Change the color of the cell depending on the person's state
                 if infectious == [True, True, False]:
                     color = GREEN
-                elif env.pop[person].recovered == True:
+                    # Save the cell's x, y center for drawing circles later
+                    circle_centers.append((
+                        (MARGIN + CELL) * col + MARGIN + int(CELL / 2),
+                        (MARGIN + CELL) * row + MARGIN + int(CELL / 2)
+                    ))
+                elif sim.pop[person].recovered == True:
                     color = BLUE
-                elif env.pop[person].alive == False:
+                elif sim.pop[person].alive == False:
                     color = RED
                 else:
-                    color = BLACK
+                    color = BLACK  # Unaffected
             else:
-                color = WHITE
+                color = WHITE  # Blank cell
+
+            # Fill in the cell's color
             pygame.draw.rect(screen, color,
                              [(MARGIN + CELL) * col + MARGIN,
                               (MARGIN + CELL) * row + MARGIN,
                               CELL,
                               CELL])
 
+        if interaction_rate != 0:  # Error check
+            # Draw circles around infectious people to show who they can
+            # # potentially infect
+            for center in circle_centers:
+                pygame.draw.circle(screen, OLIVE, center, RADIUS, MARGIN)
+
         # Display the current environment state
         pygame.display.flip()
         pygame.time.delay(TIME_DELAY)
 
+        # Simulation is over so break out of while running loop
+        if time == 0:
+            sim.generate_plot()  # Show summary stats
+            running = False
+
         # Move the simulation one time step forward
-        for person in env.pop.keys():
-            if env.pop[person].alive == True:
-                env.move(person)
-                if env.pop[person].infected == True:
-                    env.infect(person)
+        for person in sim.pop.keys():
+            if sim.pop[person].alive == True:
+                sim.move(person)
+                if sim.pop[person].infected == True:
+                    sim.infect(person)
 
         # Perform the clean up phase and save stats for plotting
-        env.clean_up(remove_persons=False)
-        env.save_stats()
+        sim.clean_up(remove_persons=False)
+        sim.save_stats()
 
         # Decrement the time steps left
         time -= 1
 
-    pygame.quit()
-
-    env.generate_plot()
+    # Exit pygame without errors
+    for evt in pygame.event.get():
+        if evt.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
 
 if __name__ == '__main__':

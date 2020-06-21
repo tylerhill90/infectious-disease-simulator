@@ -232,9 +232,9 @@ class Environment:
 
         self.report['not_infected'].append(
             self.pop_size -
+            self.report['infectious'][-1] -
             self.report['recovered'][-1] -
-            self.report['dead'][-1] -
-            self.report['infectious'][-1]
+            self.report['dead'][-1]
         )
 
     def run_basic_sim(self):
