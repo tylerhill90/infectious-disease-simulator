@@ -30,4 +30,10 @@ the person recovers based on the number of days it takes for them to recover
 defined when they were instantiated.
 
 Below is an example plot outputted from a basic simulation.
-![Example Figure](/figures/example-fig.png)
+![Example Figure](/figures/example_fig.png)
+
+# PyGame Visualization
+
+A simulation visualization tool is being also developed. See example screenshot
+below.
+![Example visualization](/figures/pygame_sim_example.png)

@@ -11,11 +11,11 @@ from InfectionSim import *
 def main():
     # SIMULATION SETUP
     # Environment parameters
-    env_dim = 150
-    pop_size = 2000
-    initially_infected = 5
-    interaction_rate = 2
-    time = 180
+    env_dim = 140
+    pop_size = 1500
+    initially_infected = 1
+    interaction_rate = 3
+    time = 150
 
     # Load environment parameters into a dict
     env_params = {
@@ -38,7 +38,7 @@ def main():
 
     # Define some visualization constants
     TIME_DELAY = 0  # Milliseconds
-    CELL = 5
+    CELL = 6
     MARGIN = 1
     RADIUS = sim.interaction_rate * (MARGIN + CELL)  # For drawing circles
     SCREEN_DIM = env_dim * CELL + (MARGIN * env_dim + 1)
@@ -109,7 +109,10 @@ def main():
         for person in sim.pop.keys():
             if sim.pop[person].alive == True:
                 sim.move(person)
-                if sim.pop[person].infected == True:
+                conditions = [
+                    sim.pop[person].infected, sim.pop[person].recovered
+                ]
+                if conditions == [True, False]:
                     sim.infect(person)
 
         # Perform the clean up phase and save stats for plotting

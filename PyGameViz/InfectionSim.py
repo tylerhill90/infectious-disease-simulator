@@ -129,19 +129,19 @@ class Environment:
 
         # Create a mask to look for people surrounding the subject
         y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
-        mask = x*x + y*y < r*r
+        mask = x*x + y*y <= r*r
 
         # Get environment indices of the mask
         mask_indices = np.where(mask == True)
 
         # Create a list of people in the circle surrounding the subject
-        persons = [x for x in self.env[mask_indices] if x != np.Inf]
+        persons = [x for x in self.env[mask_indices] if (x != np.Inf) and ([self.pop[x].infected,
+                                                                            self.pop[x].recovered] == [False, False])]
 
         # See if these people become infected
         for subject in persons:
-            if self.pop[subject].infected == False:
-                if random() <= self.infection_rate:
-                    self.pop[subject].infected = True
+            if random() <= self.infection_rate:
+                self.pop[subject].infected = True
 
     def clean_up(self, remove_persons=True):
         """Traverse the environment and for each person do the following:
@@ -303,27 +303,27 @@ class Environment:
             time, not_infected, label=f'Not infected (end: {not_infected[-1]})'
         )
 
+        # Plot description
+        plt_txt = str(
+            'Simulation Parameters\n'
+            f'Environment dimensions: {self.env_dim} x {self.env_dim}\n'
+            f'Population size: {self.pop_size}\n'
+            f'Initially infected: {self.initially_infected}\n'
+            f'Interaction rate: {self.interaction_rate}\n'
+            f'Time steps: {self.time}'
+        )
+
         # Set graph title, axis, and legend
         plt.title(
             f'Infection Simulation Results'
         )
-        plt.ylabel('Number of people')
-        plt.xlabel('Time')
         plt.legend(handles=[infectious, recovered, dead, not_infected])
+        plt.ylabel('Number of people')
+        plt.xlabel(str(
+            'Time\n\n' + plt_txt
+        ))
 
-        # Plot description
-        plt_txt = str(
-            f'This simulation was run in a {self.env_dim}x{self.env_dim} '
-            f'environment with a population size of {self.pop_size}, with '
-            f'{self.initially_infected} initially infected people. '
-            f'An interaction rate of {self.interaction_rate} was used and '
-            f'the simulation was run for {self.time} time steps.'
-        )
-
-        # Add the plot description below x-axis
-        plt.subplots_adjust(bottom=0.4)
-        plt.figtext(0.5, 0.175, plt_txt, wrap=True,
-                    ha='center', va='bottom', fontsize=10)
+        plt.subplots_adjust(bottom=0.35)
 
         # Save and show the graph if requested
         if save == True:
