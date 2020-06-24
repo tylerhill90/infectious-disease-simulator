@@ -15,7 +15,7 @@ class Environment:
     def __init__(self, env_params):
 
         # Unpack user given environment parameters
-        self.time = env_params['time']
+        self.time_steps = env_params['time_steps']
         self.env_dim = env_params['env_dim']
         self.pop_size = env_params['pop_size']
         self.initially_infected = env_params['initially_infected']
@@ -34,7 +34,8 @@ class Environment:
             'infectious': [self.initially_infected],
             'recovered': [0],
             'dead': [0],
-            'not_infected': [self.pop_size - self.initially_infected]
+            'not_infected': [self.pop_size - self.initially_infected],
+            'r_effective': [0]
         }
 
         # Generate the environment and population
@@ -66,7 +67,7 @@ class Environment:
                     continue
                 if count_infected < self.initially_infected:
                     self.pop[person].infected = True
-                count_infected += 1
+                    count_infected += 1
                 break
 
     def move(self, person):
@@ -122,30 +123,42 @@ class Environment:
             None
         """
 
-        center = np.where(self.env == person)  # Position of the subject
-        x_center, y_center = int(center[0]), int(center[1])
-        n = self.env_dim
-        r = self.interaction_rate  # Radius of circle surrounding subject
+        if self.pop[person].interaction_rate > 0:
+            center = np.where(self.env == person)  # Position of the subject
+            x_center, y_center = int(center[0]), int(center[1])
+            n = self.env_dim
+            r = self.interaction_rate  # Radius of circle surrounding subject
 
-        # Create a mask to look for people surrounding the subject
-        y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
-        mask = x*x + y*y < r*r
+            # Create a mask to look for people surrounding the subject
+            y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
+            mask = x*x + y*y <= r*r
 
-        # Get environment indices of the mask
-        mask_indices = np.where(mask == True)
+            # Get environment indices of the mask
+            mask_indices = np.where(mask == True)
 
-        # Create a list of people in the circle surrounding the subject
-        persons = [x for x in self.env[mask_indices] if x != np.Inf]
+            # Create a list of people in the circle surrounding the subject
+            # who are not already infected
+            persons = [x for x in self.env[mask_indices]
+                       if (x != np.Inf) and (
+                [self.pop[x].infected,
+                 self.pop[x].recovered,
+                 self.pop[x].alive] == [False, False, True]
+            )]
 
-        # See if these people become infected
-        for subject in persons:
-            if self.pop[subject].infected == False:
+            # See if these people become infected
+            for other_person in persons:
                 if random() <= self.infection_rate:
-                    self.pop[subject].infected = True
+                    self.pop[other_person].infected = True
+                    self.pop[person].has_infected += 1
 
     def clean_up(self, remove_persons=True):
         """Traverse the environment and for each person do the following:
                 - If someone is infected, then
+                    - See if they are contagious yet
+                        - If they are asymptomatic they have the defined 
+                        interaction rate
+                        - If they are symptomatic they have a random rounded
+                        normalized interaction rate (mean: 1, sd: 0.25)
                     - See if they die
                         - If they do, remove them from the environment
                         - If not, advance their days_infected variable
@@ -162,28 +175,53 @@ class Environment:
         for ix, iy in np.ndindex(self.env.shape):
             if self.env[ix, iy] != np.Inf:  # Cell is occupied by a person
                 person = self.env[ix, iy]
-                clean_up_conditions = [
+
+                # Check if person is alive, infected and hasn't recovered (ie. infectious)
+                infectious_conditions = [
                     self.pop[person].alive,
                     self.pop[person].infected,
                     self.pop[person].recovered
                 ]
-                if clean_up_conditions == [True, True, False]:
+                if infectious_conditions == [True, True, False]:
+                    # See if the infected person is contagious yet
+                    if self.pop[person].days_infected == self.pop[person].days_presymptomatic:
+                        # If they are asymptomatic they have a normal interaction rate
+                        if self.pop[person].asymptomatic == True:
+                            int_rate = round(np.random.normal(
+                                self.interaction_rate, 0.2 * self.interaction_rate))
+                            if int_rate > 0:
+                                self.pop[person].interaction_rate = int_rate
+                            else:
+                                self.pop[person].interaction_rate = 0
+                        # Else person is symptomatic and thus either quarantines at
+                        # home or is hospitalized (ie. lower interaction rate)
+                        else:
+                            int_rate = round(np.random.normal(1, 0.25))
+                            if int_rate > 0:
+                                self.pop[person].interaction_rate = int_rate
+                            else:
+                                self.pop[person].interaction_rate = 0
+
                     # See if the infected person dies
                     self.death_roll(person)
-                    # Remove them from the environment if they died
+                    # If they died increment the total dead thus far variable
+                    # and remove them from the environment if called for
                     if self.pop[person].alive == False:
                         self.dead += 1
                         if remove_persons:
                             self.env[ix, iy] = np.Inf
+
                     # Else they didn't die so advance their days infected and
-                    # check if they have recovered. Remove them if they have.
+                    # check if they have recovered.
                     else:
                         self.pop[person].days_infected += 1
+                        # Check if they recover and update their status if so
                         if self.pop[person].days_infected == \
                                 self.pop[person].days_to_recover:
                             self.pop[person].recovered = True
                             self.pop[person].infected = False
-                            self.recovered += 1
+                            self.recovered += 1  # Keep track of total recovered
+                            # Remove them from environment if called for
                             if remove_persons:
                                 self.env[ix, iy] = np.Inf
 
@@ -237,6 +275,24 @@ class Environment:
             self.report['dead'][-1]
         )
 
+    def calculate_r(self):
+        """Calculate the R effective value of an infection simulation
+        environment.
+        """
+        # Calculate R effective value for virus
+        has_infected_total = 0
+        has_infected_count = 0
+        for person in self.pop.keys():
+            if self.pop[person].recovered or not self.pop[person].alive:
+                has_infected_total += self.pop[person].has_infected
+                has_infected_count += 1
+        if has_infected_total != 0:
+            r_effective = has_infected_total / has_infected_count
+        else:
+            r_effective = 0
+
+        return r_effective
+
     def run_basic_sim(self):
         """Run the infection simulation and save relevant statistics at each
         time step.
@@ -247,28 +303,33 @@ class Environment:
             'infectious': [self.initially_infected],
             'recovered': [0],
             'dead': [0],
-            'not_infected': [self.pop_size - self.initially_infected]
+            'not_infected': [self.pop_size - self.initially_infected],
+            'r_effective': [0]
         }
 
         # For each epoch (time step) and for each person in the population,
         # if they are still alive and not recovered move them. If they are also
         # infected they have a chance to infect those around them.
-        for epoch in range(self.time):
+        for epoch in range(self.time_steps):
             for person in self.pop:
                 if (self.pop[person].alive, self.pop[person].recovered) == \
                         (True, False):
                     self.move(person)
                     if self.pop[person].infected == True:
                         self.infect(person)
+            self.report['r_effective'].append(
+                self.calculate_r()
+            )
 
             # Perform the clean up phase
             self.clean_up()
 
             # Report simulation progress to user every 10 time steps (epochs)
             if epoch % 10 == 0:
+                print(f'\nR effective at time step {epoch + 1}: {self.calculate_r()}')
                 print(
-                    f'Calculating time steps {epoch + 1} through {epoch + 10} '
-                    f'/ {self.time} ...')
+                    f'---\nCalculating time steps {epoch + 1} through {epoch + 10} '
+                    f'/ {self.time_steps} ...')
 
             # Save stats for graphing each epoch
             self.save_stats()
@@ -285,7 +346,7 @@ class Environment:
         """
 
         # Collect the data for graphing
-        time = np.array(range(self.time + 1))
+        time_steps = np.array(range(self.time_steps + 1))
         infectious = np.array(self.report['infectious'])
         recovered = np.array(self.report['recovered'])
         dead = np.array(self.report['dead'])
@@ -293,37 +354,37 @@ class Environment:
 
         # Plot the data
         infectious, = plt.plot(
-            time, infectious, label=str(
+            time_steps, infectious, label=str(
                 f'Infectious (end: {infectious[-1]} | max: {max(infectious)})'
             ))
         recovered, = plt.plot(
-            time, recovered, label=f'Recovered (end: {recovered[-1]})')
-        dead, = plt.plot(time, dead, label=f'Deceased (end: {dead[-1]})')
+            time_steps, recovered, label=f'Recovered (end: {recovered[-1]})')
+        dead, = plt.plot(time_steps, dead, label=f'Deceased (end: {dead[-1]})')
         not_infected, = plt.plot(
-            time, not_infected, label=f'Not infected (end: {not_infected[-1]})'
+            time_steps, not_infected, label=f'Not infected (end: {not_infected[-1]})'
+        )
+
+        # Plot description
+        plt_txt = str(
+            'Simulation Parameters\n'
+            f'Environment dimensions: {self.env_dim} x {self.env_dim}\n'
+            f'Population size: {self.pop_size}\n'
+            f'Initially infected: {self.initially_infected}\n'
+            f'Interaction rate: {self.interaction_rate}\n'
+            f'Time steps: {self.time_steps}'
         )
 
         # Set graph title, axis, and legend
         plt.title(
             f'Infection Simulation Results'
         )
-        plt.ylabel('Number of people')
-        plt.xlabel('Time')
         plt.legend(handles=[infectious, recovered, dead, not_infected])
+        plt.ylabel('Number of people')
+        plt.xlabel(str(
+            'Time\n\n' + plt_txt
+        ))
 
-        # Plot description
-        plt_txt = str(
-            f'This simulation was run in a {self.env_dim}x{self.env_dim} '
-            f'environment with a population size of {self.pop_size}, with '
-            f'{self.initially_infected} initially infected people. '
-            f'An interaction rate of {self.interaction_rate} was used and '
-            f'the simulation was run for {self.time} time steps.'
-        )
-
-        # Add the plot description below x-axis
-        plt.subplots_adjust(bottom=0.4)
-        plt.figtext(0.5, 0.175, plt_txt, wrap=True,
-                    ha='center', va='bottom', fontsize=10)
+        plt.subplots_adjust(bottom=0.35)
 
         # Save and show the graph if requested
         if save == True:
@@ -346,9 +407,7 @@ class Person:
 
     def __init__(self, interaction_rate, recovery_mean,
                  recovery_sd):
-
-        # Assign random interaction rate from a normal distribution
-        self.interaction_rate = interaction_rate
+        self.interaction_rate = 0
         self.infected = False
         self.days_infected = 0
         self.days_to_recover = round(np.random.normal(
@@ -356,3 +415,16 @@ class Person:
         ))
         self.recovered = False
         self.alive = True
+
+        self.asymptomatic = False
+        if random() <= 0.25:
+            self.asymptomatic = True
+
+        # SHOULD BE SOMETHING LIKE A F-DIST, NOT NORMAL
+        self.days_presymptomatic = round(
+            np.random.normal(4.5, 2))  # NEED TO CITE
+        # Bias towards the mean if less than or equal to zero
+        if self.days_presymptomatic <= 0:
+            self.days_presymptomatic = 4
+
+        self.has_infected = 0  # For calculating R naught value of virus

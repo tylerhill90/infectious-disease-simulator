@@ -25,7 +25,7 @@ After this there is a cleanup phase where the environment is traversed and for
 every infected person their is a chance they will die. This probability is
 based on cumulative density function of how many days they have been infected
 and a normal distribution of the how many days a person takes to die. If they
-die they are removed from the environment. The cleanup phase next checks if 
+die they are removed from the environment. The cleanup phase next checks if
 the person recovers based on the number of days it takes for them to recover
 defined when they were instantiated.
 
@@ -35,5 +35,9 @@ Below is an example plot outputted from a basic simulation.
 # PyGame Visualization
 
 A simulation visualization tool is being also developed. See example screenshot
-below.
+below. Black squares represent uninfected people. Green squares are currently
+infectious and the green circle surrounding them shows the radius of the
+interaction rate parameter. The blue squares represents recovered people who
+are no longer infectious or able to contract the disease. Red squares represent
+a deceased person.
 ![Example visualization](/figures/pygame_sim_example.png)
