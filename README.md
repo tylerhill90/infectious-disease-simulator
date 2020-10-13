@@ -29,7 +29,7 @@ die they are removed from the environment. The cleanup phase next checks if
 the person recovers based on the number of days it takes for them to recover
 defined when they were instantiated.
 
-Run the "basic_sim.py" script to see the graphical output from a basic
+Run the [basic_sim.py](basic_sim.py) script to see the graphical output from a basic
 simulation.
 
 Below is an example plot outputted from a basic simulation.
@@ -44,7 +44,7 @@ cells affected by the interaction rate parameter. The blue squares represent
 recovered people who are no longer infectious or able to contract the disease.
 Red squares represent a deceased person.
 
-Run the "pygame_sim.py" script to see the realtime visualization and then
+Run the [pygame_sim.py](pygame_sim.py) script to see the realtime visualization and then
 graphical output from a basic simulation.
 
 ![Example visualization](/figures/pygame_viz.png)
