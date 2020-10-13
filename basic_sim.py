@@ -4,11 +4,16 @@ in an environment that is 10% populated and with 1% initially infected. The
 simulation is run until there are no more infectious people.
 """
 
-from InfectionSim import *
 import time
+from InfectionSim import *
 
 
 def main():
+    """Load the environment parameters into a Environment object and then run
+    a basic sim with the basic_sim() method. Report the max R naught and how
+    long it took to run the simulation to the terminal. Display a graph of the
+    simulation results with the generate_plot() method.
+    """
     # Set up environmental parameters for simulation
     env_params = {
         'time_steps': 0,
@@ -24,7 +29,8 @@ def main():
 
     # Report environmental parameters to the console
     print('Environment Parameters')
-    [print(f'{key}: {value}') for key, value in env_params.items()]
+    for key, value in env_params.items():
+        print(f'{key}: {value}')
 
     # Time the simulation
     start_time = time.perf_counter()

@@ -1,10 +1,10 @@
 """Classes for running simple infection simulations.
 """
 
-import numpy as np
-from scipy.stats import norm
-from random import random, choice
 import sys
+from random import random, choice
+from scipy.stats import norm
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -40,7 +40,7 @@ class Environment:
 
         # Generate the environment and population
         self.env = np.full((self.env_dim, self.env_dim), np.Inf)
-        self.pop = {x: Person(self.interaction_rate, self.recovery_mean,
+        self.pop = {x: Person(self.recovery_mean,
                               self.recovery_sd)
                     for x in range(self.pop_size)}
 
@@ -150,16 +150,16 @@ class Environment:
             mask = x*x + y*y <= r*r
 
             # Get environment indices of the mask
-            mask_indices = np.where(mask == True)
+            mask_indices = np.where(mask)
 
             # Create a list of people in the circle surrounding the subject
             # who are not already infected
             persons = [int(x) for x in self.env[mask_indices]
                        if (x != np.Inf) and (
-                [self.pop[x].infected,
-                 self.pop[x].recovered,
-                 self.pop[x].alive] == [False, False, True]
-            )]
+                           [self.pop[x].infected,
+                            self.pop[x].recovered,
+                            self.pop[x].alive
+                            ] == [False, False, True])]
 
             # See if these people become infected
             for other_person in persons:
@@ -193,7 +193,7 @@ class Environment:
             if self.env[ix, iy] != np.Inf:  # Cell is occupied by a person
                 person = self.env[ix, iy]
 
-                # Check if person is alive, infected and hasn't recovered (ie. infectious)
+                # Check if person is alive, infected and hasn't recovered
                 infectious_conditions = [
                     self.pop[person].alive,
                     self.pop[person].infected,
@@ -204,15 +204,17 @@ class Environment:
                     if self.pop[person].days_infected == 2:
                         # If they are asymptomatic they have a randomly
                         # assigned normally distributed interaction rate
-                        if self.pop[person].asymptomatic == True:
+                        if self.pop[person].asymptomatic:
                             int_rate = round(np.random.normal(
-                                self.interaction_rate, 0.2 * self.interaction_rate))
+                                self.interaction_rate,
+                                0.2 * self.interaction_rate))
                             if int_rate > 0:
                                 self.pop[person].interaction_rate = int_rate
                             else:
                                 self.pop[person].interaction_rate = 0
-                        # Else person is symptomatic and thus either quarantines at
-                        # home or is hospitalized (ie. lower interaction rate)
+                        # Else person is symptomatic and thus either
+                        # quarantines at home or is hospitalized (ie. lower
+                        # interaction rate)
                         else:
                             int_rate = round(np.random.normal(0.75, 0.25))
                             if int_rate > 0:
@@ -224,7 +226,7 @@ class Environment:
                     self.death_roll(person)
                     # If they died increment the total dead thus far variable
                     # and remove them from the environment if called for
-                    if self.pop[person].alive == False:
+                    if not self.pop[person].alive:
                         if remove_persons:
                             self.env[ix, iy] = np.Inf
 
@@ -237,7 +239,7 @@ class Environment:
                                 self.pop[person].days_to_recover:
                             self.pop[person].recovered = True
                             self.pop[person].infected = False
-                            self.recovered += 1  # Keep track of total recovered
+                            self.recovered += 1  # Track total recovered
                             # Remove them from environment if called for
                             if remove_persons:
                                 self.env[ix, iy] = np.Inf
@@ -338,7 +340,7 @@ class Environment:
                 if (self.pop[person].alive, self.pop[person].recovered) == \
                         (True, False):
                     self.move(person)
-                    if self.pop[person].infected == True:
+                    if self.pop[person].infected:
                         self.infect(person)
             self.report['r_naught'].append(
                 self.calculate_r()
@@ -356,7 +358,6 @@ class Environment:
 
             if epoch == 0 and self.time_steps == 0:
                 epoch += 1
-                continue
             elif self.report['infectious'][-1] == 0:
                 running = False
                 self.time_steps = epoch + 1
@@ -407,7 +408,7 @@ class Environment:
 
         # Set graph title, axis, and legend
         plt.title(
-            f'Infection Simulation Results'
+            'Infection Simulation Results'
         )
         plt.legend(handles=[infectious, recovered, dead, not_infected])
         plt.ylabel('Number of people')
@@ -418,9 +419,9 @@ class Environment:
         plt.subplots_adjust(bottom=0.35)
 
         # Save and show the graph if requested
-        if save == True:
+        if save:
             plt.savefig(f'./{self}')
-        if show == True:
+        if show:
             plt.show()
             plt.close()
 
@@ -437,7 +438,7 @@ class Person:
     """A class for creating people to populate the Environment class with.
     """
 
-    def __init__(self, interaction_rate, recovery_mean,
+    def __init__(self, recovery_mean,
                  recovery_sd):
         self.infected = False
         self.recovered = False
