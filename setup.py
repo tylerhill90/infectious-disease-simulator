@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Tyler Hill",
     author_email="tylerhill90@gmail.com",
-    description="A COVID-19 infection simulator",
+    description="An infectious disease simulator",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://https://github.com/tylerhill90/COVID-19-Simulator",
