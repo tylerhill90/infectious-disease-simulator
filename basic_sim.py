@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run a basic simulation of a COVID-19 outbreak in a 1000 person population
 in an environment that is 10% populated and with 1% initially infected. The
-simulation is run for 180 time steps with an interaction rate of 2.
+simulation is run until there are no more infectious people.
 """
 
 from InfectionSim import *
@@ -14,12 +14,12 @@ def main():
         'time_steps': 0,
         'env_dim': 100,
         'pop_size': 1000,
-        'initially_infected': 10,
+        'initially_infected': 3,
         'interaction_rate': 4,
-        'infection_rate': .4,  # Need to confirm
-        'mortality_rate': .02,  # Need to confirm
-        'days_to_recover': (19, 5),  # Need to confirm
-        'days_to_die': (14, 4)  # Need to confirm
+        'infection_rate': .4,  # Percent likelihood of spreading the disease
+        'mortality_rate': .02,  # Percent likelihood of dieing from the disease
+        'days_to_recover': (19, 3),  # Mean and SD of days it takes to recover
+        'days_to_die': (14, 4)  # Mean and SD of days it takes to die
     }
 
     # Report environmental parameters to the console

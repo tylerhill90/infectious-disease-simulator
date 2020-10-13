@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""
+"""This uses PyGame to visualize a COVID-19 outbreak in a population of 1000
+people living relatively close and with a high rate of interaction. The
+simulation is run until there are no more infectious people.
 """
 
 import sys
@@ -12,10 +14,10 @@ from InfectionSim import *
 
 def main():
     # Environment parameters
-    env_dim = 140
-    pop_size = 1500
+    env_dim = 100
+    pop_size = 1000
     initially_infected = 3
-    interaction_rate = 5
+    interaction_rate = 4
 
     # Load environment parameters into a dict
     env_params = {
@@ -24,10 +26,10 @@ def main():
         'pop_size': pop_size,
         'initially_infected': initially_infected,
         'interaction_rate': interaction_rate,
-        'infection_rate': 1,  # Need to confirm
-        'mortality_rate': .02,  # Need to confirm
-        'days_to_recover': (19, 3),  # Need to confirm
-        'days_to_die': (14, 4)  # Need to confirm
+        'infection_rate': .4,  # Percent likelihood of spreading the disease
+        'mortality_rate': .02,  # Percent likelihood of dieing from the disease
+        'days_to_recover': (19, 3),  # Mean and SD of days it takes to recover
+        'days_to_die': (14, 4)  # Mean and SD of days it takes to die
     }
 
     # Instantiate the simulation environment
@@ -89,6 +91,7 @@ def main():
                     y_coordinates = mask_indices[0]
                     for x, y in zip(x_coordinates, y_coordinates):
                         mask_indices_set.add((x, y))
+
         mask_indices_set = tuple(mask_indices_set)
 
         for coordinate in mask_indices_set:

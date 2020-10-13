@@ -29,15 +29,22 @@ die they are removed from the environment. The cleanup phase next checks if
 the person recovers based on the number of days it takes for them to recover
 defined when they were instantiated.
 
+Run the "basic_sim.py" script to see the graphical output from a basic
+simulation.
+
 Below is an example plot outputted from a basic simulation.
 ![Example Figure](/figures/example_fig.png)
 
 # PyGame Visualization
 
-A simulation visualization tool is being also developed. See example screenshot
-below. Black squares represent uninfected people. Green squares are currently
-infectious and the green circle surrounding them shows the radius of the
-interaction rate parameter. The blue squares represents recovered people who
-are no longer infectious or able to contract the disease. Red squares represent
-a deceased person.
-![Example visualization](/figures/pygame_sim_example.png)
+A simulation visualization tool has also been developed. See example screenshot
+below. Black squares represent uninfected people. Light green squares are
+currently infectious and the darker green circle surrounding them shows the
+cells affected by the interaction rate parameter. The blue squares represent
+recovered people who are no longer infectious or able to contract the disease.
+Red squares represent a deceased person.
+
+Run the "pygame_sim.py" script to see the realtime visualization and then
+graphical output from a basic simulation.
+
+![Example visualization](/figures/pygame_viz.png)
