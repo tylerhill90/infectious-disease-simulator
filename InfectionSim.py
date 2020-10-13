@@ -35,7 +35,7 @@ class Environment:
             'recovered': [0],
             'dead': [0],
             'not_infected': [self.pop_size - self.initially_infected],
-            'r_effective': [0]
+            'r_naught': [0]
         }
 
         # Generate the environment and population
@@ -55,6 +55,12 @@ class Environment:
         # Error check user
         if self.pop_size > self.env_dim ** 2:
             sys.exit('Population larger than environment can support.')
+
+        if self.pop_size < self.initially_infected:
+            sys.exit(
+                'Population smaller than the number of initially infected '
+                'people defined.'
+            )
 
         count_infected = 0  # Track the number of initially infected people
         for person in self.pop:
@@ -78,7 +84,7 @@ class Environment:
             person (int): The person in the population who is moving
 
         Return:
-            None
+            int: Returns 0 if the person did not move or 1 if they did
         """
 
         position = np.where(self.env == person)  # Current position in env
@@ -87,14 +93,19 @@ class Environment:
             [-1, 0], [1, 0],
             [-1, -1], [0, -1], [1, -1]
         ]
+
         while True:
+            # Positions exhausted so person doesn't move
             if directions == []:
-                break
-            step = choice(directions)
-            directions.remove(step)
+                return 0
+
+            step = choice(directions)  # Choose random direction to step
             new_position = [position[0] + step[0],
                             position[1] + step[1]]
 
+            # The environment has no borders
+            # Wrap around to other side if moving past the bounds of the
+            # environment array
             for coordinate in range(len(new_position)):
                 if new_position[coordinate] == -1:
                     new_position[coordinate] = self.env_dim - 1
@@ -107,11 +118,15 @@ class Environment:
                 self.env[new_position[0], new_position[1]] = person
                 # Remove subject from previous position
                 self.env[position[0], position[1]] = np.Inf
+
             # New position is full so choose a new random step
             else:
+                directions.remove(step)  # Remove from future choices
                 continue
 
             break
+
+        return 1  # Person moved
 
     def infect(self, person):
         """See if an infectious person infects others.
@@ -127,7 +142,8 @@ class Environment:
             center = np.where(self.env == person)  # Position of the subject
             x_center, y_center = int(center[0]), int(center[1])
             n = self.env_dim
-            r = self.interaction_rate  # Radius of circle surrounding subject
+            # Radius of circle surrounding subject
+            r = self.pop[person].interaction_rate
 
             # Create a mask to look for people surrounding the subject
             y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
@@ -138,7 +154,7 @@ class Environment:
 
             # Create a list of people in the circle surrounding the subject
             # who are not already infected
-            persons = [x for x in self.env[mask_indices]
+            persons = [int(x) for x in self.env[mask_indices]
                        if (x != np.Inf) and (
                 [self.pop[x].infected,
                  self.pop[x].recovered,
@@ -163,6 +179,7 @@ class Environment:
                         - If they do, remove them from the environment
                         - If not, advance their days_infected variable
                             - Check if they recover
+                    - Save stats for the time step
         Args:
             remove_persons (bool): If True dead and recovered people are not
                 removed from the environment. Useful for the PyGame
@@ -183,9 +200,10 @@ class Environment:
                     self.pop[person].recovered
                 ]
                 if infectious_conditions == [True, True, False]:
-                    # See if the infected person is contagious yet
-                    if self.pop[person].days_infected == self.pop[person].days_presymptomatic:
-                        # If they are asymptomatic they have a normal interaction rate
+                    # It takes 48 hrs to become infectious
+                    if self.pop[person].days_infected == 2:
+                        # If they are asymptomatic they have a randomly
+                        # assigned normally distributed interaction rate
                         if self.pop[person].asymptomatic == True:
                             int_rate = round(np.random.normal(
                                 self.interaction_rate, 0.2 * self.interaction_rate))
@@ -196,7 +214,7 @@ class Environment:
                         # Else person is symptomatic and thus either quarantines at
                         # home or is hospitalized (ie. lower interaction rate)
                         else:
-                            int_rate = round(np.random.normal(1, 0.25))
+                            int_rate = round(np.random.normal(0.75, 0.25))
                             if int_rate > 0:
                                 self.pop[person].interaction_rate = int_rate
                             else:
@@ -207,7 +225,6 @@ class Environment:
                     # If they died increment the total dead thus far variable
                     # and remove them from the environment if called for
                     if self.pop[person].alive == False:
-                        self.dead += 1
                         if remove_persons:
                             self.env[ix, iy] = np.Inf
 
@@ -224,6 +241,7 @@ class Environment:
                             # Remove them from environment if called for
                             if remove_persons:
                                 self.env[ix, iy] = np.Inf
+        self.save_stats()
 
     def death_roll(self, person):
         """See if an infected person dies or not based on how many days they
@@ -248,6 +266,7 @@ class Environment:
         # See if they die
         if random() <= death_prob:
             self.pop[person].alive = False
+            self.dead += 1
 
     def save_stats(self):
         """Save the number of infectious, recovered, and dead people in the
@@ -280,18 +299,20 @@ class Environment:
         environment.
         """
         # Calculate R effective value for virus
-        has_infected_total = 0
-        has_infected_count = 0
+        infected_total = 0
+        infected_count = 0
         for person in self.pop.keys():
             if self.pop[person].recovered or not self.pop[person].alive:
-                has_infected_total += self.pop[person].has_infected
-                has_infected_count += 1
-        if has_infected_total != 0:
-            r_effective = has_infected_total / has_infected_count
-        else:
-            r_effective = 0
+                infected_total += self.pop[person].has_infected
+                infected_count += 1
 
-        return r_effective
+        # Don't allow a division by zero error
+        if infected_total != 0:
+            r_naught = round(infected_total / infected_count, 2)
+        else:
+            r_naught = 0
+
+        return r_naught
 
     def run_basic_sim(self):
         """Run the infection simulation and save relevant statistics at each
@@ -304,7 +325,7 @@ class Environment:
             'recovered': [0],
             'dead': [0],
             'not_infected': [self.pop_size - self.initially_infected],
-            'r_effective': [0]
+            'r_naught': [0]
         }
 
         # For each epoch (time step) and for each person in the population,
@@ -317,7 +338,7 @@ class Environment:
                     self.move(person)
                     if self.pop[person].infected == True:
                         self.infect(person)
-            self.report['r_effective'].append(
+            self.report['r_naught'].append(
                 self.calculate_r()
             )
 
@@ -326,13 +347,11 @@ class Environment:
 
             # Report simulation progress to user every 10 time steps (epochs)
             if epoch % 10 == 0:
-                print(f'\nR effective at time step {epoch + 1}: {self.calculate_r()}')
+                print(
+                    f'\nR effective at time step {epoch + 1}: {self.calculate_r()}')
                 print(
                     f'---\nCalculating time steps {epoch + 1} through {epoch + 10} '
                     f'/ {self.time_steps} ...')
-
-            # Save stats for graphing each epoch
-            self.save_stats()
 
     def generate_plot(self, show=True, save=False):
         """Generate a plot from a simulation.
@@ -394,11 +413,12 @@ class Environment:
             plt.close()
 
     def __repr__(self):
-        return str(f'Pop{self.pop_size}-'
-                   f'Env{self.env_dim}x{self.env_dim}-'
-                   f'InitInfect{self.initially_infected}-'
-                   f'IntRate{self.interaction_rate}'
-                   '.png')
+        return str(
+            f'Pop{self.pop_size}-'
+            f'Env{self.env_dim}x{self.env_dim}-'
+            f'InitInfect{self.initially_infected}-'
+            f'IntRate{self.interaction_rate}'
+        )
 
 
 class Person:
@@ -407,24 +427,17 @@ class Person:
 
     def __init__(self, interaction_rate, recovery_mean,
                  recovery_sd):
-        self.interaction_rate = 0
         self.infected = False
+        self.recovered = False
+        self.alive = True
+        self.interaction_rate = 0
         self.days_infected = 0
+        self.has_infected = 0  # For calculating R naught value of virus
         self.days_to_recover = round(np.random.normal(
             recovery_mean, recovery_sd
         ))
-        self.recovered = False
-        self.alive = True
 
-        self.asymptomatic = False
         if random() <= 0.25:
             self.asymptomatic = True
-
-        # SHOULD BE SOMETHING LIKE A F-DIST, NOT NORMAL
-        self.days_presymptomatic = round(
-            np.random.normal(4.5, 2))  # NEED TO CITE
-        # Bias towards the mean if less than or equal to zero
-        if self.days_presymptomatic <= 0:
-            self.days_presymptomatic = 4
-
-        self.has_infected = 0  # For calculating R naught value of virus
+        else:
+            self.asymptomatic = False

@@ -39,7 +39,7 @@ def main():
     end_time = time.perf_counter()
     run_time = end_time - start_time
 
-    print(f'\nMax R effective: {max(env.report["r_effective"])}')
+    print(f'\nMax R naught: {max(env.report["r_naught"])}')
     print(f'Run time: {run_time:.4} secs')
 
     # Graph results
