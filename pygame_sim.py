@@ -49,7 +49,7 @@ def main():
     WHITE = (255, 255, 255)
     RED = (255, 0, 0)
     GREEN = (0, 255, 0)
-    OLIVE = (100, 200, 0)
+    OLIVE = (75, 150, 0)
     BLUE = (0, 0, 255)
 
     # Define screen size based on the env_dim, the cell size of the grid, and
