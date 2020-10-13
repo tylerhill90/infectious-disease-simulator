@@ -295,10 +295,10 @@ class Environment:
         )
 
     def calculate_r(self):
-        """Calculate the R effective value of an infection simulation
+        """Calculate the R naught value of an infection simulation
         environment.
         """
-        # Calculate R effective value for virus
+        # Calculate R naught value for virus
         infected_total = 0
         infected_count = 0
         for person in self.pop.keys():
@@ -331,7 +331,9 @@ class Environment:
         # For each epoch (time step) and for each person in the population,
         # if they are still alive and not recovered move them. If they are also
         # infected they have a chance to infect those around them.
-        for epoch in range(self.time_steps):
+        running = True
+        epoch = 0
+        while running:
             for person in self.pop:
                 if (self.pop[person].alive, self.pop[person].recovered) == \
                         (True, False):
@@ -348,10 +350,20 @@ class Environment:
             # Report simulation progress to user every 10 time steps (epochs)
             if epoch % 10 == 0:
                 print(
-                    f'\nR effective at time step {epoch + 1}: {self.calculate_r()}')
+                    f'\nR naught at time step {epoch + 1}: {self.calculate_r()}')
                 print(
-                    f'---\nCalculating time steps {epoch + 1} through {epoch + 10} '
-                    f'/ {self.time_steps} ...')
+                    f'---\nCalculating time steps {epoch + 1} through {epoch + 10} ...')
+
+            if epoch == 0 and self.time_steps == 0:
+                epoch += 1
+                continue
+            elif self.report['infectious'][-1] == 0:
+                running = False
+                self.time_steps = epoch + 1
+            elif epoch == self.time_steps:
+                running = False
+            else:
+                epoch += 1
 
     def generate_plot(self, show=True, save=False):
         """Generate a plot from a simulation.

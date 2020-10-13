@@ -11,11 +11,11 @@ import time
 def main():
     # Set up environmental parameters for simulation
     env_params = {
-        'time_steps': 180,
+        'time_steps': 0,
         'env_dim': 100,
         'pop_size': 1000,
         'initially_infected': 10,
-        'interaction_rate': 2,
+        'interaction_rate': 4,
         'infection_rate': .4,  # Need to confirm
         'mortality_rate': .02,  # Need to confirm
         'days_to_recover': (19, 5),  # Need to confirm

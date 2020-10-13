@@ -12,8 +12,8 @@ from InfectionSim import *
 
 def main():
     # Environment parameters
-    env_dim = 100
-    pop_size = 500
+    env_dim = 140
+    pop_size = 1500
     initially_infected = 3
     interaction_rate = 5
 
