@@ -12,6 +12,9 @@ import InfectionSim as infect
 
 
 def main():
+    """Set up and run the simulation until there are no more infectious people.
+    """
+
     # Environment parameters that are used elsewhere for the visualization
     env_dim = 100
     pop_size = 1000
@@ -20,17 +23,23 @@ def main():
 
     # Load environment parameters into a dict
     env_params = {
-        'time_steps': 0,
+        'time_steps': 0,  # Run the sim until there are no infectious people
         'env_dim': env_dim,
         'pop_size': pop_size,
         'initially_infected': initially_infected,
         'interaction_rate': interaction_rate,
         'infection_rate': .4,  # Percent likelihood of spreading the disease
         'mortality_rate': .02,  # Percent likelihood of dieing from the disease
-        'days_to_recover': (19, 3),  # Mean and SD of days it takes to recover
-        'days_to_die': (14, 4),  # Mean and SD of days it takes to die
-        'asymptomatic_prob': 0.25
+        'recovery_mean': 19,  # Mean number of days it takes to recover
+        'recovery_sd': 3,  # Standard deviation of days it takes to recover
+        'death_mean': 14,  # Mean number of days it takes to die
+        'death_sd': 4,  # Standard deviation of days it takes to die
+        'asymptomatic_prob': 0.25  # Probability of being asymptomatic
     }
+
+    print('Environment Parameters')
+    for key, value in env_params.items():
+        print(f'{key}: {value}')
 
     # Instantiate the simulation environment
     sim = infect.Environment(env_params)

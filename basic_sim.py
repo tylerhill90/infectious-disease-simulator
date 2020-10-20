@@ -16,16 +16,18 @@ def main():
     """
     # Set up environmental parameters for simulation
     env_params = {
-        'time_steps': 0,
+        'time_steps': 0,  # Run the sim until there are no infectious people
         'env_dim': 100,
         'pop_size': 1000,
         'initially_infected': 3,
         'interaction_rate': 4,
         'infection_rate': .4,  # Percent likelihood of spreading the disease
         'mortality_rate': .02,  # Percent likelihood of dieing from the disease
-        'days_to_recover': (19, 3),  # Mean and SD of days it takes to recover
-        'days_to_die': (14, 4),  # Mean and SD of days it takes to die
-        'asymptomatic_prob': 0.25
+        'recovery_mean': 19,  # Mean number of days it takes to recover
+        'recovery_sd': 3,  # Standard deviation of days it takes to recover
+        'death_mean': 14,  # Mean number of days it takes to die
+        'death_sd': 4,  # Standard deviation of days it takes to die
+        'asymptomatic_prob': 0.25  # Probability of being asymptomatic
     }
 
     # Report environmental parameters to the console

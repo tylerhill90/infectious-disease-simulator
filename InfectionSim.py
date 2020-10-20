@@ -22,10 +22,10 @@ class Environment:
         self.interaction_rate = env_params['interaction_rate']
         self.infection_rate = env_params['infection_rate']
         self.mortality_rate = env_params['mortality_rate']
-        self.recovery_mean = env_params['days_to_recover'][0]
-        self.recovery_sd = env_params['days_to_recover'][1]
-        self.death_mean = env_params['days_to_die'][0]
-        self.death_sd = env_params['days_to_die'][1]
+        self.recovery_mean = env_params['recovery_mean']
+        self.recovery_sd = env_params['recovery_sd']
+        self.death_mean = env_params['death_mean']
+        self.death_sd = env_params['death_sd']
         self.asymptomatic_prob = env_params['asymptomatic_prob']
 
         # Keep track of stats during the simulation to use for graphing
