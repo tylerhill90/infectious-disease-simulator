@@ -5,7 +5,7 @@ simulation is run until there are no more infectious people.
 """
 
 import time
-from InfectionSim import *
+import InfectionSim as infect
 
 
 def main():
@@ -24,7 +24,8 @@ def main():
         'infection_rate': .4,  # Percent likelihood of spreading the disease
         'mortality_rate': .02,  # Percent likelihood of dieing from the disease
         'days_to_recover': (19, 3),  # Mean and SD of days it takes to recover
-        'days_to_die': (14, 4)  # Mean and SD of days it takes to die
+        'days_to_die': (14, 4),  # Mean and SD of days it takes to die
+        'asymptomatic_prob': 0.25
     }
 
     # Report environmental parameters to the console
@@ -36,10 +37,10 @@ def main():
     start_time = time.perf_counter()
 
     # Create environment
-    env = Environment(env_params)
+    env = infect.Environment(env_params)
 
     # Run simulation
-    env.run_basic_sim()
+    env.run_sim()
 
     # Report max R efective value and the run time
     end_time = time.perf_counter()

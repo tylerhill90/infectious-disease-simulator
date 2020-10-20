@@ -5,15 +5,14 @@ simulation is run until there are no more infectious people.
 """
 
 import sys
+from time import perf_counter
 import pygame
 import numpy as np
-import itertools
-from time import perf_counter
-from InfectionSim import *
+import InfectionSim as infect
 
 
 def main():
-    # Environment parameters
+    # Environment parameters that are used elsewhere for the visualization
     env_dim = 100
     pop_size = 1000
     initially_infected = 3
@@ -29,11 +28,12 @@ def main():
         'infection_rate': .4,  # Percent likelihood of spreading the disease
         'mortality_rate': .02,  # Percent likelihood of dieing from the disease
         'days_to_recover': (19, 3),  # Mean and SD of days it takes to recover
-        'days_to_die': (14, 4)  # Mean and SD of days it takes to die
+        'days_to_die': (14, 4),  # Mean and SD of days it takes to die
+        'asymptomatic_prob': 0.25
     }
 
     # Instantiate the simulation environment
-    sim = Environment(env_params)
+    sim = infect.Environment(env_params)
 
     # PYGAME VISUALIZATION
     pygame.init()
@@ -60,43 +60,46 @@ def main():
     while running:
         start_time_step = perf_counter()
         infected_people = []
-        circle_centers = []
 
         # Draw the current environment state
         screen.fill(BLACK)
 
-        # Draw the "mask" around infected people showing their interaction rate
-        mask_indices_set = set()
+        # Get a tuple object consisting of each coordinate in the environment
+        # that is part of a "mask" that represents the interaction rate of each
+        # infected person
+        mask_indices_set = set()  # Empty master list
         for row, col in np.ndindex(sim.env.shape):
             pygame.draw.rect(screen, WHITE,
                              [(MARGIN + CELL) * col + MARGIN,
                               (MARGIN + CELL) * row + MARGIN,
-                                 CELL,
-                                 CELL])
+                              CELL,
+                              CELL])
             if sim.env[row, col] != np.Inf:  # Cell is occupied by a person
                 person = sim.env[row, col]
                 r = sim.pop[person].interaction_rate
                 infectious = [sim.pop[person].alive,
                               sim.pop[person].infected,
                               sim.pop[person].recovered]
-                # Change the color of the cell depending on the person's state
+
+                # If the person is infectious then get environment indices of
+                # their mask
                 if infectious == [True, True, False]:
                     y, x = np.ogrid[-col: env_dim - col, -row: env_dim - row]
                     mask = x*x + y*y <= r*r
-
-                    # Get environment indices of the mask
                     mask_indices = np.where(mask == True)
                     mask_indices = [tuple(mask) for mask in mask_indices]
                     x_coordinates = mask_indices[1]
                     y_coordinates = mask_indices[0]
+
+                    # Add their mask indices to the master list
                     for x, y in zip(x_coordinates, y_coordinates):
                         mask_indices_set.add((x, y))
 
         mask_indices_set = tuple(mask_indices_set)
 
+        # Draw in the masks
         for coordinate in mask_indices_set:
             row, col = coordinate[0], coordinate[1]
-            # Fill in the cell's color
             pygame.draw.rect(screen, OLIVE,
                              [(MARGIN + CELL) * col + MARGIN,
                               (MARGIN + CELL) * row + MARGIN,
@@ -113,15 +116,10 @@ def main():
                 # Change the color of the cell depending on the person's state
                 if infectious == [True, True, False]:
                     color = GREEN
-                    # Save the cell's x, y center for drawing circles later
-                    circle_centers.append((
-                        (MARGIN + CELL) * col + MARGIN + int(CELL / 2),
-                        (MARGIN + CELL) * row + MARGIN + int(CELL / 2)
-                    ))
                     infected_people.append(person)
-                elif sim.pop[person].recovered == True:
+                elif sim.pop[person].recovered:
                     color = BLUE
-                elif sim.pop[person].alive == False:
+                elif not sim.pop[person].alive:
                     color = RED
                 else:
                     color = BLACK  # Unaffected
@@ -135,7 +133,7 @@ def main():
 
         # Move the simulation one time step forward
         for person in sim.pop.keys():
-            if sim.pop[person].alive == True:
+            if sim.pop[person].alive:
                 sim.move(person)
                 conditions = [
                     sim.pop[person].infected, sim.pop[person].recovered

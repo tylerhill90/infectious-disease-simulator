@@ -26,6 +26,7 @@ class Environment:
         self.recovery_sd = env_params['days_to_recover'][1]
         self.death_mean = env_params['days_to_die'][0]
         self.death_sd = env_params['days_to_die'][1]
+        self.asymptomatic_prob = env_params['asymptomatic_prob']
 
         # Keep track of stats during the simulation to use for graphing
         self.recovered = 0
@@ -41,7 +42,8 @@ class Environment:
         # Generate the environment and population
         self.env = np.full((self.env_dim, self.env_dim), np.Inf)
         self.pop = {x: Person(self.recovery_mean,
-                              self.recovery_sd)
+                              self.recovery_sd,
+                              self.asymptomatic_prob)
                     for x in range(self.pop_size)}
 
         # Populate the environment
@@ -171,7 +173,7 @@ class Environment:
         """Traverse the environment and for each person do the following:
                 - If someone is infected, then
                     - See if they are contagious yet
-                        - If they are asymptomatic they have the defined 
+                        - If they are asymptomatic they have the defined
                         interaction rate
                         - If they are symptomatic they have a random rounded
                         normalized interaction rate (mean: 1, sd: 0.25)
@@ -190,6 +192,7 @@ class Environment:
         """
 
         for ix, iy in np.ndindex(self.env.shape):
+            dead, recovered_ = False, False
             if self.env[ix, iy] != np.Inf:  # Cell is occupied by a person
                 person = self.env[ix, iy]
 
@@ -200,35 +203,30 @@ class Environment:
                     self.pop[person].recovered
                 ]
                 if infectious_conditions == [True, True, False]:
-                    # It takes 48 hrs to become infectious
+                    # It takes 48 hrs to become infectious and for that
+                    # person's interaction rate to potentially change
                     if self.pop[person].days_infected == 2:
                         # If they are asymptomatic they have a randomly
                         # assigned normally distributed interaction rate
+                        # with the standard deviation equal to half that of
+                        # the mean interaction rate
                         if self.pop[person].asymptomatic:
-                            int_rate = round(np.random.normal(
-                                self.interaction_rate,
-                                0.2 * self.interaction_rate))
-                            if int_rate > 0:
-                                self.pop[person].interaction_rate = int_rate
-                            else:
-                                self.pop[person].interaction_rate = 0
+                            self.pop[person].interaction_rate = \
+                                round(np.random.normal(self.interaction_rate,
+                                                       0.5 * self.interaction_rate))
                         # Else person is symptomatic and thus either
                         # quarantines at home or is hospitalized (ie. lower
                         # interaction rate)
                         else:
-                            int_rate = round(np.random.normal(0.75, 0.25))
-                            if int_rate > 0:
-                                self.pop[person].interaction_rate = int_rate
-                            else:
-                                self.pop[person].interaction_rate = 0
+                            self.pop[person].interaction_rate = \
+                                round(np.random.normal(0.75, 0.25))
 
                     # See if the infected person dies
                     self.death_roll(person)
                     # If they died increment the total dead thus far variable
                     # and remove them from the environment if called for
                     if not self.pop[person].alive:
-                        if remove_persons:
-                            self.env[ix, iy] = np.Inf
+                        dead = True
 
                     # Else they didn't die so advance their days infected and
                     # check if they have recovered.
@@ -240,9 +238,11 @@ class Environment:
                             self.pop[person].recovered = True
                             self.pop[person].infected = False
                             self.recovered += 1  # Track total recovered
-                            # Remove them from environment if called for
-                            if remove_persons:
-                                self.env[ix, iy] = np.Inf
+                            recovered_ = True
+
+                # Remove them from environment if called for
+            if remove_persons and (dead or recovered_):
+                self.env[ix, iy] = np.Inf
         self.save_stats()
 
     def death_roll(self, person):
@@ -316,7 +316,7 @@ class Environment:
 
         return r_naught
 
-    def run_basic_sim(self):
+    def run_sim(self):
         """Run the infection simulation and save relevant statistics at each
         time step.
         """
@@ -439,7 +439,7 @@ class Person:
     """
 
     def __init__(self, recovery_mean,
-                 recovery_sd):
+                 recovery_sd, asymptomatic_prob):
         self.infected = False
         self.recovered = False
         self.alive = True
@@ -450,7 +450,7 @@ class Person:
             recovery_mean, recovery_sd
         ))
 
-        if random() <= 0.25:
+        if random() <= asymptomatic_prob:
             self.asymptomatic = True
         else:
             self.asymptomatic = False
