@@ -22,4 +22,6 @@ A simulation visualization has also been developed. See the example screenshot b
 
 Run the [pygame_sim.py](pygame_sim.py) script to see the realtime visualization and then graphical output summary from a COVID-19 outbreak in a population of a thousand people. The simulation is run until there are no more infectious people.
 
-![Example visualization](/figures/pygame_viz.png)
+Below is a GIF of the visualization.
+
+![Example visualization](/figures/pygame_viz.gif)
