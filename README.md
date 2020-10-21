@@ -18,10 +18,8 @@ Below is an example plot outputted from a basic simulation.
 
 # PyGame Visualization
 
-A simulation visualization has also been developed. See the example screenshot below of a single time step mid way through a simulation. Black squares represent uninfected people. Light green squares are currently infectious and the darker green circle surrounding them shows the cells in the environment that represent the interaction rate of that infectious person. The blue squares represent recovered people who are no longer infectious or able to contract the disease. Red squares represent a deceased person.
-
-Run the [pygame_sim.py](pygame_sim.py) script to see the realtime visualization and then graphical output summary from a COVID-19 outbreak in a population of a thousand people. The simulation is run until there are no more infectious people.
-
-Below is a GIF of the visualization.
+A basic simulation can also be visualized by running the [pygame_sim.py](pygame_sim.py) script. See the example GIF below of a simulation in progress. 
 
 ![Example visualization](/figures/pygame_viz.gif)
+
+Black squares represent uninfected people. Light green squares are currently infectious and the darker green circle surrounding them shows the cells in the environment that represent the interaction rate of that infectious person. The blue squares represent recovered people who are no longer infectious or able to contract the disease. Red squares represent a deceased person.
