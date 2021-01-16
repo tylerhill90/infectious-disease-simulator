@@ -24,9 +24,8 @@ class Environment:
         self.mortality_rate = env_params['mortality_rate']
         self.recovery_mean = env_params['recovery_mean']
         self.recovery_sd = env_params['recovery_sd']
-        self.death_mean = env_params['death_mean']
-        self.death_sd = env_params['death_sd']
         self.asymptomatic_prob = env_params['asymptomatic_prob']
+        self.days_until_infectious = env_params['days_until_infectious']
 
         # Keep track of stats during the simulation to use for graphing
         self.recovered = 0
@@ -203,9 +202,10 @@ class Environment:
                     self.pop[person].recovered
                 ]
                 if infectious_conditions == [True, True, False]:
-                    # It takes 48 hrs to become infectious and for that
+                    self.pop[person].days_infected += 1
+                    # It takes 2 days to become infectious and for that
                     # person's interaction rate to potentially change
-                    if self.pop[person].days_infected == 2:
+                    if self.pop[person].days_infected == self.days_until_infectious:
                         # If they are asymptomatic they have a randomly
                         # assigned normally distributed interaction rate
                         # with the standard deviation equal to half that of
@@ -221,20 +221,16 @@ class Environment:
                             self.pop[person].interaction_rate = \
                                 round(np.random.normal(0.75, 0.25))
 
-                    # See if the infected person dies
-                    self.death_roll(person)
-                    # If they died increment the total dead thus far variable
-                    # and remove them from the environment if called for
-                    if not self.pop[person].alive:
-                        dead = True
-
-                    # Else they didn't die so advance their days infected and
-                    # check if they have recovered.
-                    else:
-                        self.pop[person].days_infected += 1
-                        # Check if they recover and update their status if so
-                        if self.pop[person].days_infected == \
-                                self.pop[person].days_to_recover:
+                    # Check if they recover and update their status if so
+                    if self.pop[person].days_infected == \
+                            self.pop[person].days_to_recover:
+                        # See if the infected person dies
+                        self.death_roll(person)
+                        # If they died increment the total dead thus far variable
+                        # and remove them from the environment if called for
+                        if not self.pop[person].alive:
+                            dead = True
+                        else:
                             self.pop[person].recovered = True
                             self.pop[person].infected = False
                             self.recovered += 1  # Track total recovered
@@ -246,8 +242,7 @@ class Environment:
         self.save_stats()
 
     def death_roll(self, person):
-        """See if an infected person dies or not based on how many days they
-        have been infected.
+        """See if an infected person dies or not.
 
         Args:
             person (int): The person who may die.
@@ -256,17 +251,7 @@ class Environment:
             None
         """
 
-        days_infected = self.pop[person].days_infected
-
-        # Normal distribution centered on median days it takes to die
-        death_norm = norm(self.death_mean, self.death_sd)
-        # Probability that someone will die given how many days they have
-        # already been infected
-        death_prob = self.mortality_rate * \
-            (death_norm.cdf(days_infected) - death_norm.cdf(days_infected - 1))
-
-        # See if they die
-        if random() <= death_prob:
+        if random() <= self.mortality_rate:
             self.pop[person].alive = False
             self.dead += 1
 
@@ -399,7 +384,6 @@ class Environment:
         # Plot description
         plt_txt = str(
             'Simulation Parameters\n'
-            f'Environment dimensions: {self.env_dim} x {self.env_dim}\n'
             f'Population size: {self.pop_size}\n'
             f'Initially infected: {self.initially_infected}\n'
             f'Interaction rate: {self.interaction_rate}\n'

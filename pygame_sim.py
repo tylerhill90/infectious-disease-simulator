@@ -11,35 +11,15 @@ import numpy as np
 import InfectionSim as infect
 
 
-def main():
+def run_sim(env_params):
     """Set up and run the simulation until there are no more infectious people.
     """
 
     # Environment parameters that are used elsewhere for the visualization
-    env_dim = 100
-    pop_size = 1000
-    initially_infected = 3
-    interaction_rate = 4
-
-    # Load environment parameters into a dict
-    env_params = {
-        'time_steps': 0,  # Run the sim until there are no infectious people
-        'env_dim': env_dim,
-        'pop_size': pop_size,
-        'initially_infected': initially_infected,
-        'interaction_rate': interaction_rate,
-        'infection_rate': .4,  # Percent likelihood of spreading the disease
-        'mortality_rate': .02,  # Percent likelihood of dieing from the disease
-        'recovery_mean': 19,  # Mean number of days it takes to recover
-        'recovery_sd': 3,  # Standard deviation of days it takes to recover
-        'death_mean': 14,  # Mean number of days it takes to die
-        'death_sd': 4,  # Standard deviation of days it takes to die
-        'asymptomatic_prob': 0.25  # Probability of being asymptomatic
-    }
-
-    print('Environment Parameters')
-    for key, value in env_params.items():
-        print(f'{key}: {value}')
+    env_dim = env_params['env_dim']
+    pop_size = env_params['pop_size']
+    initially_infected = env_params['initially_infected']
+    interaction_rate = env_params['interaction_rate']
 
     # Instantiate the simulation environment
     sim = infect.Environment(env_params)
@@ -76,7 +56,7 @@ def main():
         # Get a tuple object consisting of each coordinate in the environment
         # that is part of a "mask" that represents the interaction rate of each
         # infected person
-        mask_indices_set = set()  # Empty master list
+        mask_indices_set = []  # Empty master list
         for row, col in np.ndindex(sim.env.shape):
             pygame.draw.rect(screen, WHITE,
                              [(MARGIN + CELL) * col + MARGIN,
@@ -102,9 +82,7 @@ def main():
 
                     # Add their mask indices to the master list
                     for x, y in zip(x_coordinates, y_coordinates):
-                        mask_indices_set.add((x, y))
-
-        mask_indices_set = tuple(mask_indices_set)
+                        mask_indices_set.append((x, y))
 
         # Draw in the masks
         for coordinate in mask_indices_set:
@@ -174,6 +152,25 @@ def main():
         if evt.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+
+def main():
+    # Load environment parameters into a dict
+    env_params = {
+        'time_steps': 0,  # Run the sim until there are no infectious people
+        'env_dim': 100,
+        'pop_size': 1000,
+        'initially_infected': 3,
+        'interaction_rate': 3,
+        'infection_rate': .4,  # Percent likelihood of spreading the disease
+        'mortality_rate': .02,  # Percent likelihood of dieing from the disease
+        'recovery_mean': 19,  # Mean number of days it takes to recover
+        'death_sd': 4,  # Standard deviation of days it takes to die
+        'asymptomatic_prob': 0.25,  # Probability of being asymptomatic
+        'days_unitl_infectious': 2
+    }
+
+    run_sim(env_params)
 
 
 if __name__ == '__main__':

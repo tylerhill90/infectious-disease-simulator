@@ -16,10 +16,12 @@ Below is an example plot outputted from a basic simulation.
 
 ![Example Figure](/figures/example_fig.png)
 
-# PyGame Visualization
+# PyGame Visualization with GUI
 
-A basic simulation can also be visualized by running the [pygame_sim.py](pygame_sim.py) script. See the example GIF below of a simulation in progress. 
+A basic simulation can also be visualized with GUI inputs by running the [run_sim.py](run_sim.py) script. See the example GIFs below of changing the starting conditions with the GUI and a simulation in progress.
 
-![Example visualization](/figures/pygame_viz.gif)
+![Example GUI input](/figures/gui.gif)
 
-Black squares represent uninfected people. Light green squares are currently infectious and the darker green circle surrounding them shows the cells in the environment that represent the interaction rate of that infectious person. The blue squares represent recovered people who are no longer infectious or able to contract the disease. Red squares represent a deceased person.
+![Example visualization](/figures/sim_running.gif)
+
+Black squares represent uninfected people. Light green squares are currently infectious people and the darker green circle surrounding them show the cells in the environment that represent their interaction rate. Any uninfected people in these darker green squares may also become infected. The blue squares represent recovered people who are no longer infectious or able to contract the disease. Red squares represent a deceased person.

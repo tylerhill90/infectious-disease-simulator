@@ -25,9 +25,8 @@ def main():
         'mortality_rate': .02,  # Percent likelihood of dieing from the disease
         'recovery_mean': 19,  # Mean number of days it takes to recover
         'recovery_sd': 3,  # Standard deviation of days it takes to recover
-        'death_mean': 14,  # Mean number of days it takes to die
-        'death_sd': 4,  # Standard deviation of days it takes to die
-        'asymptomatic_prob': 0.25  # Probability of being asymptomatic
+        'asymptomatic_prob': 0.25,  # Probability of being asymptomatic
+        'days_unitl_infectious': 2
     }
 
     # Report environmental parameters to the console
