@@ -2,26 +2,24 @@
 
 The intent of this project is to run simple simulations of how an infectious disease spreads through a population.
 
-[InfectionSim.py](InfectionSim.py) houses the classes necessary to run these simulations. The Environment class creates an NumPy 2D array to act as an environment for a population to randomly move around in. The environment is populated randomly with integers representing unique people in the population. Each integer is associated with a Person instance in a dictionary to keep track of their state. The first n number of people put into the environment are set as 'infected' where n is defined as the initial number of infected people.
+[InfectionSim.py](InfectionSim.py) houses the classes necessary to run these simulations. The Environment class creates an NumPy 2D array to act as an environment for a population to randomly move around in. The environment is populated randomly with integers representing the people in the population. Each integer is associated with a Person instance in a dictionary to keep track of their state. The first n number of people put into the environment are infected where n is the initial number of infected people.
 
-Each Person instance is assigned a number of days (time steps) until they recover from the infection based on a defined normal distribution and also whether they will be asymptomatic based on a predefined probability. If they are asymptomatic their interaction rate will likely be higher due to not knowing they are sick. Conversely, if they are symptomatic then their interaction rate will be 0 or 1, representing their attempt to self isolate.
+Each Person instance is assigned a number of days (time steps) until they recover from the infection based on a defined normal distribution and also whether they will be asymptomatic based on a predefined probability. If they are asymptomatic their interaction rate will likely be higher due to not knowing that they are sick. Conversely, if they are symptomatic then their interaction rate will be 0 or 1, representing their attempt to self isolate.
 
-When the simulation is run everyone in the environment moves a random direction in the environment from their current position, with the edges of the environment wrapping around to the other side. If a person is boxed in by other people they will stay put for that time step. If a person is currently infectious there is a chance they will infect the other people immediately around them based on the interaction and infection rate that is defined.
+During the simulation each person moves one step from their current position and the edges of the environment wraparound. If a person is boxed in by other people they will stay put for that time step. If a person is currently infectious there is a chance they will infect the other people immediately around them based on their own interaction and the defined infection rate.
 
-After this there is a cleanup phase where the environment is traversed and for every infected person their is a chance that they will die. This probability is based on cumulative density function of how many days they have been infected and a normal distribution of the how many days a person takes to die. If they die they are removed from the environment. The cleanup phase next checks if the person recovers based on the number of days it takes for them to recover defined when they were instantiated.
+After this there is a cleanup phase where each person is checked to see if they have reached the number of days it takes for them to either recover or die. If they recover they are no longer infectious and are immune to reinfection and if they die they are removed from the simulation.
 
-Run the [basic_sim.py](basic_sim.py) script to see the graphical output from a basic simulation of a COVID-19 outbreak in a population of a thousand people. The simulation is run until there are no more infectious people.
+To see a graph of the results from a COVID-19 simulation run the [basic_sim.py](basic_sim.py) script.
 
-Below is an example plot outputted from a basic simulation.
+# PyGame Visualization with GUI Inputs
 
-![Example Figure](/figures/example_fig.png)
-
-# PyGame Visualization with GUI
-
-A basic simulation can also be visualized with GUI inputs by running the [run_sim.py](run_sim.py) script. See the example GIFs below of changing the starting conditions with the GUI and a simulation in progress.
+A simulation can also be visualized with GUI inputs by running the [run_sim.py](run_sim.py) script. See the example GIFs below.
 
 ![Example GUI input](/figures/gui.gif)
 
 ![Example visualization](/figures/sim_running.gif)
 
-Black squares represent uninfected people. Light green squares are currently infectious people and the darker green circle surrounding them show the cells in the environment that represent their interaction rate. Any uninfected people in these darker green squares may also become infected. The blue squares represent recovered people who are no longer infectious or able to contract the disease. Red squares represent a deceased person.
+![Example simulation graph](figures/infect_sim_graph.png)
+
+Black squares are uninfected people. Light green squares are currently infectious people. The darker green circle surrounding them show the cells in the environment that represent their interaction rate and any uninfected people in these darker green squares may also become infected. The blue squares are recovered people who are no longer infectious or able to contract the disease. Red squares are deceased people.

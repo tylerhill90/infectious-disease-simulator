@@ -11,6 +11,24 @@ import numpy as np
 import InfectionSim as infect
 
 
+def step_sim(sim):
+    # Move the simulation one time step forward
+    for person in sim.pop.keys():
+        if sim.pop[person].alive:
+            sim.move(person)
+            conditions = [
+                sim.pop[person].infected, sim.pop[person].recovered
+            ]
+            if conditions == [True, False]:  # Person is infectious
+                sim.infect(person)
+
+    # Perform the clean up phase
+    sim.clean_up(remove_persons=False)
+
+    # Increment the time steps
+    sim.time_steps += 1
+
+
 def run_sim(env_params):
     """Set up and run the simulation until there are no more infectious people.
     """
@@ -48,7 +66,6 @@ def run_sim(env_params):
     running = True
     while running:
         start_time_step = perf_counter()
-        infected_people = []
 
         # Draw the current environment state
         screen.fill(BLACK)
@@ -93,6 +110,7 @@ def run_sim(env_params):
                               CELL,
                               CELL])
 
+        infected_people = []
         # Draw in the people
         for row, col in np.ndindex(sim.env.shape):
             if sim.env[row, col] != np.Inf:  # Cell is occupied by a person
@@ -118,21 +136,7 @@ def run_sim(env_params):
                                   CELL,
                                   CELL])
 
-        # Move the simulation one time step forward
-        for person in sim.pop.keys():
-            if sim.pop[person].alive:
-                sim.move(person)
-                conditions = [
-                    sim.pop[person].infected, sim.pop[person].recovered
-                ]
-                if conditions == [True, False]:  # Person is infectious
-                    sim.infect(person)
-
-        # Perform the clean up phase
-        sim.clean_up(remove_persons=False)
-
-        # Increment the time steps
-        sim.time_steps += 1
+        step_sim(sim)
 
         # Display the current environment state after a time delay if requested
         end_time_step = perf_counter()
