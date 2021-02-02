@@ -1,7 +1,7 @@
 # Infectious Disease Simulator
 The intent of this project is to run simple simulations of how an infectious disease spreads through a population using an OOP design paradigm.
 
-To see the from the results of a COVID-19 simulation run the [basic_sim.py](basic_sim.py) script.
+To see the graphical results of a COVID-19 like simulation run the [basic_sim.py](basic_sim.py) script.
 
 ## Overview of how a simulation is run
 [infect_sim.py](infect_sim.py) houses the classes necessary to run a simulation.
