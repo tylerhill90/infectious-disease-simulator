@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""
+"""This uses the PySimpleGUI package to quickly adjust the parameters fed into
+a PyGame visualization.
 """
 
 import PySimpleGUI as sg
-
-from pygame_sim import run_sim
+from pygame_sim import run_viz
 
 
 def main():
+    """Setup and run a PySimpleGUI interface for running PyGame
+    visualizations using the user defined variables.
+    """
+
+    # Define the layout of the GUI
     simulation_parameters = [
         [sg.Text('Simulation Parameters', font=('Helvetica', 18))],
         [sg.Text('Population:'), sg.Slider(range=(100, 1000),
@@ -60,12 +65,15 @@ def main():
 
     window = sg.Window('Infectious Disease Simulator', simulation_parameters)
 
+    # Run until the user exits
     while True:
         event, values = window.read()
         # See if user wants to quit or window was closed
         if event in (sg.WINDOW_CLOSED, 'Quit'):
             break
-        elif event == 'Run Simulation':
+
+        # Run a PyGame visualization of the currently selected parameters
+        if event == 'Run Simulation':
             env_params = {
                 'time_steps': 0,
                 'env_dim': 100,
@@ -80,7 +88,7 @@ def main():
                 'days_until_infectious': int(values['days_until_infect'])
             }
 
-            run_sim(env_params)
+            run_viz(env_params)
 
     # Finish up by removing from the screen
     window.close()

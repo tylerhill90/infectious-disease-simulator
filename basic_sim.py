@@ -5,7 +5,7 @@ simulation is run until there are no more infectious people.
 """
 
 import time
-import InfectionSim as infect
+import infection_sim as infect
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
         'recovery_mean': 19,  # Mean number of days it takes to recover
         'recovery_sd': 3,  # Standard deviation of days it takes to recover
         'asymptomatic_prob': 0.25,  # Probability of being asymptomatic
-        'days_unitl_infectious': 2
+        'days_until_infectious': 2
     }
 
     # Report environmental parameters to the console

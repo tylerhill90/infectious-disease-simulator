@@ -8,7 +8,7 @@ import sys
 from time import perf_counter
 import pygame
 import numpy as np
-import InfectionSim as infect
+import infection_sim as infect
 
 
 def step_sim(sim):
@@ -29,7 +29,7 @@ def step_sim(sim):
     sim.time_steps += 1
 
 
-def run_sim(env_params):
+def run_viz(env_params):
     """Set up and run the simulation until there are no more infectious people.
     """
 
@@ -73,7 +73,7 @@ def run_sim(env_params):
         # Get a tuple object consisting of each coordinate in the environment
         # that is part of a "mask" that represents the interaction rate of each
         # infected person
-        mask_indices_set = []  # Empty master list
+        mask_indices_set = []
         for row, col in np.ndindex(sim.env.shape):
             pygame.draw.rect(screen, WHITE,
                              [(MARGIN + CELL) * col + MARGIN,
@@ -110,7 +110,6 @@ def run_sim(env_params):
                               CELL,
                               CELL])
 
-        infected_people = []
         # Draw in the people
         for row, col in np.ndindex(sim.env.shape):
             if sim.env[row, col] != np.Inf:  # Cell is occupied by a person
@@ -121,7 +120,6 @@ def run_sim(env_params):
                 # Change the color of the cell depending on the person's state
                 if infectious == [True, True, False]:
                     color = GREEN
-                    infected_people.append(person)
                 elif sim.pop[person].recovered:
                     color = BLUE
                 elif not sim.pop[person].alive:
@@ -138,7 +136,7 @@ def run_sim(env_params):
 
         step_sim(sim)
 
-        # Display the current environment state after a time delay if requested
+        # Display the current environment state after a time delay
         end_time_step = perf_counter()
         run_time = (end_time_step - start_time_step) * 1000  # Milliseconds
         delay = int(TIME_DELAY - run_time)
@@ -174,7 +172,7 @@ def main():
         'days_unitl_infectious': 2
     }
 
-    run_sim(env_params)
+    run_viz(env_params)
 
 
 if __name__ == '__main__':

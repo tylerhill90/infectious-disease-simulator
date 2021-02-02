@@ -3,7 +3,6 @@
 
 import sys
 from random import random, choice
-from scipy.stats import norm
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -107,7 +106,7 @@ class Environment:
             # The environment has no borders
             # Wrap around to other side if moving past the bounds of the
             # environment array
-            for coordinate in range(len(new_position)):
+            for coordinate, _ in enumerate(new_position):
                 if new_position[coordinate] == -1:
                     new_position[coordinate] = self.env_dim - 1
                 if new_position[coordinate] == self.env_dim:
@@ -139,6 +138,7 @@ class Environment:
             None
         """
 
+        # Only run if person has a positive interaction rate
         if self.pop[person].interaction_rate > 0:
             center = np.where(self.env == person)  # Position of the subject
             x_center, y_center = int(center[0]), int(center[1])
@@ -147,7 +147,7 @@ class Environment:
             r = self.pop[person].interaction_rate
 
             # Create a mask to look for people surrounding the subject
-            y, x = np.ogrid[-y_center: n-y_center, -x_center: n-x_center]
+            y, x = np.ogrid[-x_center: n-x_center, -y_center: n-y_center]
             mask = x*x + y*y <= r*r
 
             # Get environment indices of the mask
@@ -370,6 +370,7 @@ class Environment:
         not_infected = np.array(self.report['not_infected'])
 
         # Plot the data
+        plt.figure(figsize=(7,7))
         infectious, = plt.plot(
             time_steps, infectious, label=str(
                 f'Infectious (end: {infectious[-1]} | max: {max(infectious)})'
@@ -387,6 +388,9 @@ class Environment:
             f'Population size: {self.pop_size}\n'
             f'Initially infected: {self.initially_infected}\n'
             f'Interaction rate: {self.interaction_rate}\n'
+            f'Infection rate: {self.infection_rate * 100}%\n'
+            f'Mortality rate: {self.mortality_rate * 100}%\n'
+            f'Asymptomatic rate: {self.asymptomatic_prob * 100}%\n'
             f'Time steps: {self.time_steps}'
         )
 
