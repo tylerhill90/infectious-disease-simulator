@@ -30,4 +30,6 @@ The initial environmental parameters are meant to simulate a COVID-19 outbreak. 
 
 Black squares are uninfected people. Light green squares are currently infectious people. The darker green circle surrounding them show the cells in the environment that represent their interaction rate and any uninfected people in these darker green squares may also become infected. The blue squares are recovered people who are no longer infectious or able to contract the disease. Red squares are deceased people.
 
+After the visualization is done running a time series graph of the simulation data is displayed.
+
 ![Example simulation graph](figures/infect_sim_graph.png)
