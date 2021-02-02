@@ -388,9 +388,9 @@ class Environment:
             f'Population size: {self.pop_size}\n'
             f'Initially infected: {self.initially_infected}\n'
             f'Interaction rate: {self.interaction_rate}\n'
-            f'Infection rate: {self.infection_rate * 100}%\n'
-            f'Mortality rate: {self.mortality_rate * 100}%\n'
-            f'Asymptomatic rate: {self.asymptomatic_prob * 100}%\n'
+            f'Infection rate: {self.infection_rate * 100:.0f}%\n'
+            f'Mortality rate: {self.mortality_rate * 100:.0f}%\n'
+            f'Asymptomatic rate: {self.asymptomatic_prob * 100:.0f}%\n'
             f'Time steps: {self.time_steps}'
         )
 

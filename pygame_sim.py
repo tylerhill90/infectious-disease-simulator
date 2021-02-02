@@ -8,7 +8,7 @@ import sys
 from time import perf_counter
 import pygame
 import numpy as np
-import infection_sim as infect
+import infect_sim as infect
 
 
 def step_sim(sim):

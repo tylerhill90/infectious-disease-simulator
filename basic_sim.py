@@ -5,7 +5,7 @@ simulation is run until there are no more infectious people.
 """
 
 import time
-import infection_sim as infect
+import infect_sim as infect
 
 
 def main():

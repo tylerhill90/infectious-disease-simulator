@@ -40,7 +40,7 @@ def main():
                                                  font=('Helvetica', 12),
                                                  key='interaction')],
         [sg.Text('Infection rate:'), sg.Slider(range=(0, 100),
-                                               default_value=25,
+                                               default_value=40,
                                                size=(20, 15),
                                                orientation='horizontal',
                                                font=('Helvetica', 12),

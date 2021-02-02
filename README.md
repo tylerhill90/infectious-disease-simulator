@@ -1,10 +1,10 @@
 # Infectious Disease Simulator
 The intent of this project is to run simple simulations of how an infectious disease spreads through a population using an OOP design paradigm.
 
-To see a graph of the results from a COVID-19 simulation run the [basic_sim.py](basic_sim.py) script.
+To see the from the results of a COVID-19 simulation run the [basic_sim.py](basic_sim.py) script.
 
 ## Overview of how a simulation is run
-[InfectionSim.py](InfectionSim.py) houses the classes necessary to run a simulation.
+[infect_sim.py](infect_sim.py) houses the classes necessary to run a simulation.
 
 #### Setting Up the Environment
 The Environment class creates an NumPy 2D array to act as an environment for a population to randomly move around in. The environment is populated randomly with integers representing the people in the population. Each integer is associated with a Person instance in a dictionary to keep track of their state. The first n number of people put into the environment are infected where n is the initial number of infected people.
