@@ -1,10 +1,23 @@
 # Infectious Disease Simulator
 
-The intent of this project is to run simple simulations of how an infectious disease spreads through a population. It uses NumPy for efficiency, PyGame for visualization, and PySimpleGUI for adjusting the starting parameters.
+A visual Python simulation of how an infectious disease spreads in a population. It uses NumPy for efficiency, PyGame for visualization, and PySimpleGUI for adjusting the starting parameters.
 
-The [infect_sim.py](infect_sim.py) file houses the code necessary for the simulations.
+## Quick start
 
-A simulation can be visualized with easily adjustable GUI inputs by running the [run_sim.py](run_sim.py) script. The initial environmental parameters are meant to simulate a COVID-19 outbreak.
+To run a simulation clone this repo, install the requirements into a venv, and execute the [run_sum.py](./run_sim.py) script.
+
+```console
+git clone https://github.com/tylerhill90/infectious-disease-simulator.git
+cd infectious-disease-simulator
+python3 -m venv env
+source env/bin/activate
+python3 -m pip install -r requirements.txt
+./run_sim.py
+```
+
+The presets in the GUI are meant to simulate a COVID-19 outbreak. Click run simulation for the visualized simulation window to open. After the disease runs its course a graph of the outbreak will popup.
+
+## Example GIFs of a simulation
 
 ![Example GUI input](/figures/gui.gif)
 
